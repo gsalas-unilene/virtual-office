@@ -138,6 +138,17 @@
         "meeting_north_pasadizo": 1.0,
         "marketing_internacional_west": 0.9,
         "jefe_rrhh_north": 0.9
+      },
+      "central_office_south_wall": {
+        "status": "approximate",
+        "line": "solid",
+        "classification": "partial wall",
+        "start_m": [11.45, 13.35],
+        "end_m": [12.55, 13.35],
+        "height_m": 1.6,
+        "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster; visually distinct solid short right segment with h=1.60 annotation; not suitable for construction",
+        "interpretation": "Furniture overlap is ambiguous, so only this annotated solid segment is modeled. The dashed PROY. VIGA is auxiliary, not a wall."
       }
     },
     "scale_traced_features": [

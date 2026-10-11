@@ -159,7 +159,13 @@ def _partition_boxes(plan):
             raise ValueError(f"partition {partition_id!r} must have finite centerline endpoints")
         if not isinstance(thickness, (int, float)) or not math.isfinite(thickness) or thickness <= 0:
             raise ValueError(f"partition {partition_id!r} must have positive finite thickness")
-        if not isinstance(height, (int, float)) or not math.isfinite(height) or height < 2.4:
+        is_central_office_partial_wall = partition_id == "central-office-south"
+        valid_height = isinstance(height, (int, float)) and math.isfinite(height) and (
+            height == 1.6 if is_central_office_partial_wall else height >= 2.4
+        )
+        if not valid_height:
+            if is_central_office_partial_wall:
+                raise ValueError("partition 'central-office-south' must be exactly 1.60 m high")
             raise ValueError(f"partition {partition_id!r} must be at least 2.40 m high")
         if not isinstance(openings, list):
             raise ValueError(f"partition {partition_id!r} must list its openings")

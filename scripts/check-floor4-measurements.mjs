@@ -136,6 +136,29 @@ check(typeof t3b?.dimensionReadability === "string" && t3b.dimensionReadability.
 "T3B must distinguish unreadable room dimensions from approximate, non-constructive raster traces");
 check(Array.isArray(t3b?.scale_traced_features) && ["open pool-zone outline", "meeting-room boundary", "adjacent-office boundary", "enclosed Marketing International manager room", "enclosed HR chief room", "partitions", "door gaps", "circulation connections", "north-pasadizo extension", "east-core-edge connector"].every((feature) => t3b.scale_traced_features.includes(feature)),
 "T3B register must identify all raster-traced room, partition, opening, and circulation features");
+const centralOfficeSouthEstimate = estimates?.central_office_south_wall;
+const planCentralOfficeSouth = (planInterior?.partitions ?? []).find((partition) => partition?.id === "central-office-south");
+check(centralOfficeSouthEstimate?.status === "approximate"
+  && centralOfficeSouthEstimate?.line === "solid"
+  && centralOfficeSouthEstimate?.classification === "partial wall"
+  && samePair(centralOfficeSouthEstimate?.start_m, [11.45, 13.35])
+  && samePair(centralOfficeSouthEstimate?.end_m, [12.55, 13.35])
+  && matchesDimension(centralOfficeSouthEstimate?.height_m, 1.6)
+  && Array.isArray(centralOfficeSouthEstimate?.openings) && centralOfficeSouthEstimate.openings.length === 0
+  && typeof centralOfficeSouthEstimate?.source === "string"
+  && centralOfficeSouthEstimate.source.includes("scale-traced")
+  && centralOfficeSouthEstimate.source.includes("approximate/non-constructive")
+  && typeof centralOfficeSouthEstimate?.interpretation === "string"
+  && centralOfficeSouthEstimate.interpretation.toLowerCase().includes("furniture")
+  && centralOfficeSouthEstimate.interpretation.includes("ambiguous")
+  && centralOfficeSouthEstimate.interpretation.includes("PROY. VIGA")
+  && centralOfficeSouthEstimate.interpretation.includes("not a wall")
+  && samePair(planCentralOfficeSouth?.start_m, centralOfficeSouthEstimate?.start_m)
+  && samePair(planCentralOfficeSouth?.end_m, centralOfficeSouthEstimate?.end_m)
+  && matchesDimension(planCentralOfficeSouth?.height_m, centralOfficeSouthEstimate?.height_m)
+  && Array.isArray(planCentralOfficeSouth?.openings) && planCentralOfficeSouth.openings.length === 0
+  && planCentralOfficeSouth?.source === centralOfficeSouthEstimate?.source,
+"T3R-CW-S must register and match the approximate solid short segment, 1.60 m height, no openings, and the honest furniture/PROY. VIGA interpretation");
 
 const t3c = register.t3c_east;
 const t3cEstimates = t3c?.trace_estimates_approximate_m;

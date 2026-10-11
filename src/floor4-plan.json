@@ -381,9 +381,9 @@
       },
       {
         "id": "central-office-south",
-        "start_m": [10.6, 13.35], "end_m": [12.55, 13.35],
-        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
+        "start_m": [11.45, 13.35], "end_m": [12.55, 13.35],
+        "thickness_m": 0.12, "height_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster; visually distinct solid short right segment with h=1.60 annotation; not suitable for construction"
       },
       {
         "id": "central-office-meeting-divider",

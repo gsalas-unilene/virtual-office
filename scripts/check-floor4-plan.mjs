@@ -272,8 +272,9 @@ if (interior && typeof interior === "object" && !Array.isArray(interior)) {
     `${partition?.id ?? "partition"} must have a non-zero finite centerline inside its T3A/T3B/T3C trace zone`);
     check(finite(partition?.thickness_m) && partition.thickness_m > 0,
       `${partition?.id ?? "partition"} must have a positive finite thickness`);
-    check(finite(partition?.height_m) && partition.height_m >= register.constraints.minimum_ceiling_clearance_m,
-      `${partition?.id ?? "partition"} must be at least 2.40 m high`);
+    const partialWall = partition?.id === "central-office-south";
+    check(finite(partition?.height_m) && (partialWall || partition.height_m >= register.constraints.minimum_ceiling_clearance_m),
+      `${partition?.id ?? "partition"} must be at least 2.40 m high unless it is the explicit central-office-south partial wall`);
     check(approximateSource(partition?.source), `${partition?.id ?? "partition"} must label raster-traced dimensions approximate and non-constructive`);
     const length = pair(partition?.start_m) && pair(partition?.end_m)
       ? Math.hypot(partition.end_m[0] - partition.start_m[0], partition.end_m[1] - partition.start_m[1]) : 0;
@@ -383,6 +384,15 @@ if (interior && typeof interior === "object" && !Array.isArray(interior)) {
     "T3B adjacent OFICINA must match its approximate A=0 plan-frame trace");
   check(meeting?.name === "ZONA DE REUNIONES" && sameBounds(meetingBounds, { minX: 12.55, maxX: 17.8, minY: 13.35, maxY: 17.05 }),
     "T3B ZONA DE REUNIONES must match its approximate A=0 plan-frame trace");
+  const centralOfficeSouth = interior.partitions.find((partition) => partition?.id === "central-office-south");
+  const centralOfficeSouthEstimate = register.t3b_central?.trace_estimates_approximate_m?.central_office_south_wall;
+  check(JSON.stringify(centralOfficeSouth?.start_m) === JSON.stringify([11.45, 13.35])
+    && JSON.stringify(centralOfficeSouth?.end_m) === JSON.stringify([12.55, 13.35])
+    && centralOfficeSouth?.height_m === 1.6
+    && Array.isArray(centralOfficeSouth?.openings) && centralOfficeSouth.openings.length === 0
+    && approximateSource(centralOfficeSouth?.source)
+    && centralOfficeSouth?.source === centralOfficeSouthEstimate?.source,
+  "T3R-CW-S must model only the approximate solid u=11.45–12.55 m segment at v=13.35 m, h=1.60 m, with no openings and matching measurement provenance");
   const marketingRoom = interior.rooms.find((room) => room?.id === "gerente-marketing-internacional");
   const hrChiefRoom = interior.rooms.find((room) => room?.id === "jefe-recursos-humanos");
   const marketingBounds = boundsOf(marketingRoom?.polygon_m);
@@ -1156,8 +1166,27 @@ mathutils.Vector = object
 sys.modules["mathutils"] = mathutils
 namespace = runpy.run_path(sys.argv[1], run_name="floor4_checkpoint_geometry_test")
 prepare = namespace.get("_prepare_checkpoint_plan")
+partition_builder = namespace.get("_partition_boxes")
 assert callable(prepare), "missing checkpoint plan geometry derivation"
+assert callable(partition_builder), "missing checkpoint interior partition builder"
 plan = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
+try:
+    built_partition_boxes = partition_builder(plan)
+except ValueError as error:
+    raise AssertionError(f"builder rejected the registered 1.60 m central-office-south partial wall: {error}") from error
+target_wall_boxes = [box for box in built_partition_boxes if box["name"].startswith("partition_central-office-south_")]
+assert len(target_wall_boxes) == 1 and target_wall_boxes[0]["height"] == 1.6, target_wall_boxes
+for invalid_id, invalid_height in (("central-office-south", 1.5), ("central-office-west", 1.6)):
+    invalid_plan = json.loads(json.dumps(plan))
+    invalid_partition = next(partition for partition in invalid_plan["interior"]["partitions"] if partition["id"] == invalid_id)
+    invalid_partition["height_m"] = invalid_height
+    try:
+        partition_builder(invalid_plan)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"invalid partition height accepted: {invalid_id} at {invalid_height} m")
+print("PASS: builder allows only the 1.60 m central-office-south partial wall and rejects other sub-2.40 m heights.")
 interior_before = json.loads(json.dumps(plan["interior"]))
 prepare(plan)
 assert plan["interior"] == interior_before
