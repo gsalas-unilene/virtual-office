@@ -226,7 +226,7 @@ if (interior && typeof interior === "object" && !Array.isArray(interior)) {
   ]);
   const t3cPartitionIds = new Set([
     "archivo-general-west", "archivo-general-south", "archivo-general-east", "archivo-general-north",
-    "elevator-core-west", "elevator-core-east", "elevator-core-south", "elevator-core-north", "elevator-core-divider",
+    "elevator-core-west", "elevator-core-east", "elevator-core-south", "elevator-core-north",
     "stair-enclosure-west", "stair-enclosure-west-landing-step", "stair-enclosure-west-landing", "stair-enclosure-east", "stair-enclosure-south", "stair-enclosure-north",
     "ducto-de-montantes-west", "ducto-de-montantes-south-east-step", "ducto-de-montantes-east-step", "ducto-de-montantes-east", "ducto-de-montantes-south", "ducto-de-montantes-north",
     "crossed-service-shaft-west", "crossed-service-shaft-east", "crossed-service-shaft-north",
@@ -298,8 +298,11 @@ if (interior && typeof interior === "object" && !Array.isArray(interior)) {
   check(partitionIds.size === t3aPartitionIds.size + t3bPartitionIds.size + t3cPartitionIds.size
     && [...t3bPartitionIds].every((id) => partitionIds.has(id)) && [...t3cPartitionIds].every((id) => partitionIds.has(id)),
   "T3B/T3C must add only the central and east-core partitions");
-  check(Array.isArray(interior.partitions) && interior.partitions.length === 51,
-    "cumulative T3A/T3B/T3C interior must contain 51 partitions after sharing the crossed-shaft south wall with the shell");
+  check(!partitionIds.has("elevator-core-divider")
+    && ["elevator-core-west", "elevator-core-east", "elevator-core-south", "elevator-core-north"].every((id) => partitionIds.has(id)),
+  "T3C elevator core must omit its interior divider while retaining all four exterior enclosure walls");
+  check(Array.isArray(interior.partitions) && interior.partitions.length === 50,
+    "cumulative T3A/T3B/T3C interior must contain 50 partitions after sharing the crossed-shaft south wall with the shell");
 
   const boundsOf = (polygon) => {
     const points = Array.isArray(polygon) ? polygon.filter(pair) : [];
@@ -1163,7 +1166,7 @@ shell_boxes = [box for box in boxes if box["kind"] == "exterior-wall"]
 partition_boxes = [box for box in boxes if box["kind"] == "interior-partition"]
 t3c_partition_ids = {
     "archivo-general-west", "archivo-general-south", "archivo-general-east", "archivo-general-north",
-    "elevator-core-west", "elevator-core-east", "elevator-core-south", "elevator-core-north", "elevator-core-divider",
+    "elevator-core-west", "elevator-core-east", "elevator-core-south", "elevator-core-north",
     "stair-enclosure-west", "stair-enclosure-west-landing-step", "stair-enclosure-west-landing", "stair-enclosure-east", "stair-enclosure-south", "stair-enclosure-north",
     "ducto-de-montantes-west", "ducto-de-montantes-south-east-step", "ducto-de-montantes-east-step", "ducto-de-montantes-east", "ducto-de-montantes-south", "ducto-de-montantes-north",
     "crossed-service-shaft-west", "crossed-service-shaft-east", "crossed-service-shaft-north",
@@ -1172,10 +1175,10 @@ t3c_partition_boxes = [box for box in partition_boxes if any(box["name"].startsw
 prior_partition_boxes = [box for box in partition_boxes if box not in t3c_partition_boxes]
 assert len(shell_boxes) == 31, len(shell_boxes)
 assert len(prior_partition_boxes) == 39, len(prior_partition_boxes)
-assert len(t3c_partition_boxes) == 28, len(t3c_partition_boxes)
-assert len(partition_boxes) == 67, len(partition_boxes)
-assert len(boxes) == 98, len(boxes)
-print("PASS: cumulative checkpoint geometry retains 39 T3A/T3B segments and adds 28 T3C segments (31 shell, 67 interior, 98 total boxes).")
+assert len(t3c_partition_boxes) == 27, len(t3c_partition_boxes)
+assert len(partition_boxes) == 66, len(partition_boxes)
+assert len(boxes) == 97, len(boxes)
+print("PASS: cumulative checkpoint geometry retains 39 T3A/T3B segments and adds 27 T3C segments (31 shell, 66 interior, 97 total boxes).")
 
 split = sorted(
     (box for box in partition_boxes if box["name"].startswith("partition_west-restroom-east_")),

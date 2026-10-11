@@ -493,12 +493,6 @@
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
       {
-        "id": "elevator-core-divider",
-        "start_m": [19.85, 18.8], "end_m": [22.65, 18.8],
-        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
-      },
-      {
         "id": "stair-enclosure-west",
         "start_m": [19.85, 12.45], "end_m": [19.85, 15.65],
         "thickness_m": 0.12, "height_m": 2.4,
