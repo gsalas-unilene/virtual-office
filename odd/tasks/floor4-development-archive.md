@@ -15,8 +15,10 @@ Preserve the complete researched/modeling history in a dedicated repository fold
 ## Tasks
 - [x] Create the archive README and task-ledger snapshot with researched dimensions/orientation, completed and provisional work, source/checkpoint inventory, verification evidence/limits, commit history, and native review closure.
   - Evidence: `archive/floor4-development/README.md` records the nonblocking cardinal-label advisory, native abandonment, untracked-file limits, and project status; `floor4-model-ledger.md` is verified byte-for-byte as a header plus the 20,753-byte source ledger.
-- [~] Commit the archive work unit on the current feature branch, fast-forward local `main`, and verify the archive and commit are present there.
-- [ ] Switch to `main`, delete every other local branch, and verify only `main` remains; leave all untracked project files untouched.
+- [x] Commit the archive work unit on the current feature branch and fast-forward local `main`.
+  - Evidence: commit `d3c88c3` (`docs(floor4): archive reconstruction progress`) is now on `main` by fast-forward; no untracked files were staged.
+- [x] Delete every non-main local branch and verify only `main` remains; leave all untracked project files untouched.
+  - Evidence: `git branch -d feature/floor4-restart feature/floor4-north-openings` deleted both refs after `main` contained archive commit `d3c88c3`; final read-only verification found only local `main` at `d3c88c37e10c331f72fdf38fbd5895f69ddffba2` and no remote. Existing untracked project/app/checkpoint/PDF files remain in the worktree and were not staged or deleted.
 
 ## Acceptance
 - `archive/floor4-development/README.md` is readable, accurate, and includes the closure reconciliation; `floor4-model-ledger.md` preserves the detailed project ledger; both point to the source and artifact locations.
