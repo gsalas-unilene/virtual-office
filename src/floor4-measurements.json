@@ -1,0 +1,225 @@
+{
+  "units": "m",
+  "source": "plano_oficina.pdf",
+  "floor": 4,
+  "grid_axis_spans_m": {
+    "A-F": 22.85,
+    "7-2": 22.25
+  },
+  "exterior_bounds": {
+    "status": "approximate",
+    "min_m": [-0.5, 0],
+    "max_m": [22.85, 22.85],
+    "width_m": 23.35,
+    "depth_m": 22.85,
+    "reason": "Approximate bounds derived from the full scale-traced exterior outline; not dimensioned and non-constructive, not suitable for construction."
+  },
+  "horizontal_grid": {
+    "from": "A",
+    "to": "F",
+    "segments_m": [5.15, 5.18, 5.62, 3.64, 3.26]
+  },
+  "vertical_grid": {
+    "from": "7",
+    "to": "2",
+    "segments_m": [1.75, 1.71, 1.78, 5.87, 5.49, 5.65]
+  },
+  "constraints": {
+    "minimum_ceiling_clearance_m": 2.4,
+    "fixed_desk_height_m": 0.75
+  },
+  "visual_evidence_approximate": {
+    "north_ledge_beyond_grid_7_m": 0.6,
+    "north_ledge_x_m": [4.6, 16.3],
+    "north_ledge_v04_v05_user_reviewed_trace": {
+      "edge_u_direction": [16.3, 4.6],
+      "v04": {"u_m": [10.8, 15.9], "edge_local_m": [0.4, 5.5]},
+      "v05": {"u_m": [4.8, 10.6], "edge_local_m": [5.7, 11.5]},
+      "v06_residual_solid_murete": {
+        "u_m": [4.6, 4.8],
+        "joins": "north-ledge-west",
+        "classification": "solid wall, not an opening or duplicate wall"
+      },
+      "provenance": "User-reviewed raster trace; approximate, scale-traced, non-constructive spans, not suitable for construction."
+    },
+    "west_offset_from_A": {
+      "approximate_distance_m": 0.5,
+      "direction": "west",
+      "grids": ["5", "3"]
+    },
+    "west_offset_x_m": [-0.5, 0],
+    "west_offset_y_m": [5.65, 17.01],
+    "east_step_y_m": 11.1,
+    "chamfer_lower_endpoint_y_m": 19.9,
+    "south_opening_x_m": [6.7, 8.6],
+    "south_opening_alignment": "appears aligned",
+    "coordinates_scale_traced": ["west", "north", "east", "chamfer"],
+    "uncertainty": "Ledge and offset endpoints, east step, chamfer, and opening positions are estimated from the raster and remain approximate, non-constructive, and unverified by survey."
+  },
+  "excluded_conflict": {
+    "description": "Conflicting lower horizontal chain",
+    "segments_m": {
+      "C-D": 5.42,
+      "D-E": 3.85
+    },
+    "disposition": "excluded",
+    "use_as_geometry": false,
+    "reason": "Conflicts with the selected upper chain; excluded and not used as geometry.",
+    "authority": "User selected the upper horizontal grid A–F as authoritative."
+  },
+  "t3a_west_north": {
+    "directly_dimensioned_grid_anchors_m": {
+      "grid_3_y": 5.65,
+      "grid_5_y": 17.01,
+      "grid_7_y": 22.25,
+      "grid_D_x": 15.95
+    },
+    "trace_estimates_approximate_m": {
+      "sh_gerencia_bounds": {"min_m": [0.15, 17.35], "max_m": [3.65, 18.9]},
+      "sh_gerencia_south_step": {
+        "status": "approximate",
+        "vertices_m": [[0.15, 17.65], [1.45, 17.65], [1.45, 17.35], [3.65, 17.35]],
+        "vertical_offset_m": 0.3
+      },
+      "west_excellence_north_return": {
+        "status": "approximate",
+        "line": "solid",
+        "classification": "solid west return only",
+        "start_m": [-0.35, 16.9],
+        "end_m": [0, 16.9],
+        "source": "scale-traced approximate/non-constructive from PDF raster; solid west return only; dashed continuation is not wall geometry"
+      },
+      "operations_technical_divider_y_m": 8.1
+    },
+    "scale_traced_features": [
+      "west-office room partitions",
+      "north-office room partitions",
+      "S.H. Gerencia boundary",
+      "S.H. Gerencia south-edge stepped wall",
+      "interior partition thickness",
+      "interior door widths and offsets",
+      "north pasadizo bounds",
+      "west-office access corridor",
+      "northwest connecting passage"
+    ],
+    "dimensionReadability": "The PDF grid-chain labels are readable and retained as direct dimensions; no room-specific interior dimensions were legible and attributable in the provided raster.",
+    "coordinateStatus": "All interior room, partition-thickness, opening, and corridor coordinates not on the registered grid anchors are raster-calibrated estimates: approximate, non-constructive, and not suitable for construction.",
+    "non_wall_annotations": [
+      "Dashed PROY. VIGA/FALSO CIELO mark at the S.H. Gerencia south edge is a ceiling/beam annotation, not wall geometry.",
+      "Dashed continuation east of the west-excellence-north solid west return is a raster annotation, not wall geometry."
+    ]
+  },
+  "t3b_central": {
+    "map_grid_relative_x_to_plan_offset_m": 0,
+    "coordinate_frame": {
+      "origin": "southwest outside corner",
+      "grid_A_x_approx_m": 0,
+      "grid_F_x_approx_m": 22.85
+    },
+    "trace_estimates_approximate_m": {
+      "oficina_bounds": {"min_m": [10.6, 13.35], "max_m": [12.55, 17.05]},
+      "meeting_bounds": {"min_m": [12.55, 13.35], "max_m": [17.8, 17.05]},
+      "gerente_marketing_internacional_bounds": {"min_m": [4.8, 14.25], "max_m": [7.7, 17.05]},
+      "jefe_rrhh_bounds": {"min_m": [7.7, 14.25], "max_m": [10.6, 17.05]},
+      "marketing_west_door_y_m": [14.3, 15.2],
+      "jefe_rrhh_north_door_x_m": [7.8, 8.7],
+      "pool_bounds": {"min_m": [4.8, 5.65], "max_m": [18.3, 13.35]},
+      "central_connector_bounds": {"min_m": [4.8, 13.35], "max_m": [10.6, 14.19]},
+      "north_pasadizo_bounds": {"min_m": [4.8, 17.05], "max_m": [16.1, 18.45]},
+      "north_pasadizo_extension_bounds": {"min_m": [16.1, 17.05], "max_m": [18.3, 18.45]},
+      "east_core_connector_bounds": {
+        "min_m": [18.3, 17.05], "max_m": [21.5, 18.45],
+        "status": "superseded by T3C east-core circulation; retained as the T3B starting trace"
+      },
+      "partition_thickness_m": 0.12,
+      "meeting_north_door_x_m": [16.8, 17.8],
+      "door_widths_m": {
+        "office_north_pasadizo": 0.8,
+        "meeting_north_pasadizo": 1.0,
+        "marketing_internacional_west": 0.9,
+        "jefe_rrhh_north": 0.9
+      }
+    },
+    "scale_traced_features": [
+      "open pool-zone outline",
+      "meeting-room boundary",
+      "adjacent-office boundary",
+      "enclosed Marketing International manager room",
+      "enclosed HR chief room",
+      "partitions",
+      "door gaps",
+      "circulation connections",
+      "north-pasadizo extension",
+      "east-core-edge connector"
+    ],
+    "dimensionReadability": "Grid-chain dimensions remain readable; no room-specific T3B dimensions were legible in the provided raster, so room boundaries, offsets, thickness, openings, and circulation are estimated.",
+    "coordinateStatus": "T3B room boundaries, raster offsets, partition thickness, opening widths, pool-zone limits, and circulation are approximate, non-constructive, and not suitable for construction; all T3B coordinates use A=0/F=22.85 in the southwest-origin plan frame, while the west exterior spur alone reaches approximately x=-0.50 m."
+  },
+  "t3c_east": {
+    "coordinate_frame": {
+      "origin": "southwest outside corner",
+      "grid_A_x_m": 0,
+      "grid_F_x_m": 22.85
+    },
+    "directly_dimensioned_grid_anchors_m": {
+      "grid_A_x": 0,
+      "grid_E_x": 19.59,
+      "grid_F_x": 22.85,
+      "row_4_y": 11.14,
+      "row_5_y": 17.01,
+      "row_6_y": 18.79,
+      "row_6_prime_y": 20.5,
+      "row_7_y": 22.25
+    },
+    "trace_estimates_approximate_m": {
+      "archivo_general_bounds": {"min_m": [19.8, 20.55], "max_m": [22.65, 22.1]},
+      "waiting_hall_bounds": {"min_m": [16.1, 17.05], "max_m": [19.7, 22.1]},
+      "ascensor_materiales_bounds": {"min_m": [19.85, 18.85], "max_m": [22.65, 20.45]},
+      "ascensor_personal_bounds": {"min_m": [19.85, 17.15], "max_m": [22.65, 18.75]},
+      "stair_enclosure_bounds": {"min_m": [19.42, 12.45], "max_m": [22.56, 17.0]},
+      "stair_west_profile_vertices_m": [[19.85, 12.45], [19.85, 15.65], [19.42, 15.65], [19.42, 17.0]],
+      "stair_recess_depth_m": 1.35,
+      "ducto_montantes_bounds": {"min_m": [19.42, 11.14], "max_m": [21.29, 12.3]},
+      "ducto_southeast_profile_vertices_m": [[21.07, 11.14], [21.07, 11.45], [21.29, 11.45]],
+      "crossed_service_shaft_bounds": {"min_m": [21.56, 11.14], "max_m": [22.62, 12.35]},
+      "crossed_service_shaft_south_base_strip": {
+        "status": "approximate",
+        "line": "solid",
+        "classification": "east-step shell boundary",
+        "modeled_by": "shell east-step",
+        "start_m": [21.5, 11.1],
+        "end_m": [22.85, 11.1],
+        "source": "scale-traced approximate/non-constructive from PDF raster; solid line is already represented by the east-step shell, not a duplicate interior wall",
+        "shared_boundary_convention": "T3C crossed shaft uses the existing east-step shell edge at y=11.10 as its shared south wall; retain the approximate room outline at y=11.14, treat the 0.04 m raster discrepancy as subordinate, and model no separate free strip."
+      },
+      "ducto_crossed_shaft_bounds_gap_m": 0.27,
+      "ducto_crossed_shaft_wall_clearance_m": 0.15,
+      "stair_duct_wall_clearance_m": 0.03,
+      "east_core_circulation_bounds": {"min_m": [17.8, 11.1], "max_m": [19.36, 22.1]},
+      "stair_frontage_approach_bounds": {"min_m": [19.36, 14.75], "max_m": [19.79, 15.55]},
+      "row_4_seam_y_m": 11.1,
+      "partition_thickness_m": 0.12,
+      "door_gaps": {
+        "archive_west": [21.0, 21.8],
+        "ascensor_personal_west": [17.4, 18.2],
+        "ascensor_materiales_west": [19.25, 20.05],
+        "stair_enclosure_west": [14.75, 15.55]
+      }
+    },
+    "scale_traced_features": [
+      "Archivo General boundary",
+      "Hall de Espera open lobby",
+      "two elevator enclosures",
+      "stair enclosure",
+      "Ducto de Montantes",
+      "crossed service-shaft mark",
+      "crossed-shaft south base strip/east-step shell boundary",
+      "east-core circulation and visible doors"
+    ],
+    "dimensionReadability": "Grid-chain anchors are readable; no room-specific east-core dimensions are legible in the PDF, so all room, opening, partition, and circulation extents are raster-traced estimates.",
+    "coordinateStatus": "All unlabelled T3C room, service-space, partition, opening, and circulation dimensions are approximate, scale-traced, non-constructive, and not suitable for construction; coordinates use A=0/F=22.85 in the southwest-origin frame.",
+    "non_wall_annotations": [
+      "Dashed PROY. VIGA/FALSO CIELO beam/ceiling marks and dashed ventilation annotations in the east core are not walls."
+    ]
+  }
+}

@@ -1,0 +1,659 @@
+{
+  "schema": "floor4-plan-v1",
+  "source": "plano_oficina.pdf",
+  "floor": 4,
+  "stage": "west-north-interior",
+  "units": "m",
+  "origin": "southwest outside corner",
+  "axes": {
+    "x": "east",
+    "y": "north"
+  },
+  "grid": {
+    "horizontal": {
+      "from": "A",
+      "to": "F",
+      "segments_m": [5.15, 5.18, 5.62, 3.64, 3.26]
+    },
+    "vertical": {
+      "from": "7",
+      "to": "2",
+      "segments_m": [1.75, 1.71, 1.78, 5.87, 5.49, 5.65]
+    }
+  },
+  "traceNotes": {
+    "directlyDimensioned": ["grid"],
+    "scaleTraced": ["full exterior outline", "north ledge", "west exterior offset", "northwest chamfer", "east-side perimeter step", "exterior openings", "wall thickness", "T3A west/north room boundaries", "T3A interior partitions and door gaps", "T3A west/north circulation", "T3B central pool and meeting/adjacent-office boundaries", "T3B north-edge office boundaries and connector routes", "T3C east-core rooms, service spaces, and circulation", "T3C crossed-shaft south base strip represented by the east-step shell boundary"],
+    "coordinateStatus": "Undimensioned perimeter, room, partition, partition-thickness, opening, and circulation coordinates are approximate, scale-traced, and non-constructive; T3B/T3C use the A=0 southwest-origin plan frame, while the west spur alone extends approximately to x=-0.50 m; not suitable for construction.",
+    "excluded": "The conflicting lower C-D=5.42 m / D-E=3.85 m chain is not used.",
+    "sharedBoundaryConvention": "T3C crossed shaft uses the existing east-step shell edge at y=11.10 as its shared south wall; retain the approximate room outline at y=11.14, treat the 0.04 m raster discrepancy as subordinate, and model no separate free strip."
+  },
+  "floorOutline": [
+    [0, 0],
+    [21.5, 0],
+    [21.5, 11.1],
+    [22.85, 11.1],
+    [22.85, 22.25],
+    [16.3, 22.25],
+    [16.3, 22.85],
+    [4.6, 22.85],
+    [4.6, 22.25],
+    [1.8, 22.25],
+    [0, 19.9],
+    [0, 17.01],
+    [-0.5, 17.01],
+    [-0.5, 5.65],
+    [0, 5.65]
+  ],
+  "shell": {
+    "wallHeight_m": 2.4,
+    "wallThickness_m": 0.15,
+    "edges": [
+      {
+        "name": "south",
+        "openings": [
+          {"name": "south-entry", "kind": "door", "from_m": 4.65, "to_m": 5.3, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "south-window-west", "kind": "window", "from_m": 6.7, "to_m": 8.6, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "south-window-center", "kind": "window", "from_m": 12.65, "to_m": 13.35, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "south-window-east", "kind": "window", "from_m": 15.75, "to_m": 16.5, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "south-window-end", "kind": "window", "from_m": 19.6, "to_m": 20.25, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "east-south",
+        "openings": [
+          {"name": "east-window-south", "kind": "window", "from_m": 7.1, "to_m": 7.9, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "east-step",
+        "openings": []
+      },
+      {
+        "name": "east-north",
+        "openings": [
+          {"name": "east-window-north", "kind": "window", "from_m": 4.7, "to_m": 5.4, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "north-east",
+        "openings": [
+          {"name": "north-window-east", "kind": "window", "from_m": 1.37, "to_m": 2.07, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "north-window-east-center", "kind": "window", "from_m": 5.17, "to_m": 5.87, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "north-ledge-east",
+        "openings": []
+      },
+      {
+        "name": "north-ledge",
+        "openings": [
+          {"name": "north-ledge-v04", "kind": "window", "from_m": 0.4, "to_m": 5.5, "source": "scale-traced approximate/non-constructive from user-reviewed raster trace"},
+          {"name": "north-ledge-v05", "kind": "window", "from_m": 5.7, "to_m": 11.5, "source": "scale-traced approximate/non-constructive from user-reviewed raster trace"}
+        ]
+      },
+      {
+        "name": "north-ledge-west",
+        "openings": []
+      },
+      {
+        "name": "north-west",
+        "openings": [
+          {"name": "north-window-west", "kind": "window", "from_m": 1.12, "to_m": 1.82, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "northwest-chamfer",
+        "openings": []
+      },
+      {
+        "name": "west-north",
+        "openings": []
+      },
+      {
+        "name": "west-offset-north",
+        "openings": []
+      },
+      {
+        "name": "west-offset",
+        "openings": [
+          {"name": "west-window-north", "kind": "window", "from_m": 0.19, "to_m": 0.99, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "west-window-center-north", "kind": "window", "from_m": 5.79, "to_m": 6.49, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      },
+      {
+        "name": "west-offset-south",
+        "openings": []
+      },
+      {
+        "name": "west-south",
+        "openings": [
+          {"name": "west-window-center-south", "kind": "window", "from_m": 0.2, "to_m": 1.0, "source": "scale-traced approximate/non-constructive from visible perimeter linework"},
+          {"name": "west-window-south", "kind": "window", "from_m": 4.03, "to_m": 4.73, "source": "scale-traced approximate/non-constructive from visible perimeter linework"}
+        ]
+      }
+    ]
+  },
+  "interior": {
+    "scope": "Cumulative T3A west/north perimeter rooms, T3B central pool, north-edge offices, meeting room, adjacent office and connector routes, plus T3C east core rooms, service spaces and circulation; excludes T3D south offices and furniture.",
+    "wallHeight_m": 2.4,
+    "wallThickness_m": 0.12,
+    "wallThicknessSource": "scale-traced approximate/non-constructive from PDF raster",
+    "coordinateStatus": "T3A geometry remains in its existing grid-anchored frame. T3B/T3C room boundaries, partition thickness and offsets, opening widths, and circulation bounds are calibrated from PDF raster linework in the A=0 plan frame; approximate and non-constructive, not suitable for construction.",
+    "rooms": [
+      {
+        "id": "director-ejecutivo-west",
+        "name": "Director Ejecutivo (west)",
+        "polygon_m": [[4.8, 18.45], [8.1, 18.45], [8.1, 22.68], [4.8, 22.68]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "director-ejecutivo-center",
+        "name": "Director Ejecutivo (center)",
+        "polygon_m": [[8.1, 18.45], [12.4, 18.45], [12.4, 22.68], [8.1, 22.68]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "recursos-humanos",
+        "name": "Recursos Humanos",
+        "polygon_m": [[12.4, 18.45], [16.1, 18.45], [16.1, 22.68], [12.4, 22.68]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "sh-gerencia",
+        "name": "S.H. Gerencia",
+        "polygon_m": [[0.15, 17.65], [1.45, 17.65], [1.45, 17.35], [3.65, 17.35], [3.65, 18.9], [0.15, 18.9]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerente-excelencia-operacional",
+        "name": "Gerente de Excelencia Operacional",
+        "polygon_m": [[-0.35, 14.45], [3.65, 14.45], [3.65, 17.01], [-0.35, 17.01]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerente-comercial",
+        "name": "Gerente Comercial",
+        "polygon_m": [[-0.35, 11.65], [3.65, 11.65], [3.65, 14.45], [-0.35, 14.45]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerente-operaciones-proyectos",
+        "name": "Gerente de Operaciones y Proyectos",
+        "polygon_m": [[-0.35, 8.1], [3.65, 8.1], [3.65, 11.65], [-0.35, 11.65]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerente-tecnico",
+        "name": "Gerente Técnico",
+        "polygon_m": [[-0.35, 5.65], [3.65, 5.65], [3.65, 8.1], [-0.35, 8.1]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerente-marketing-internacional",
+        "name": "GERENTE DE MARKETING INTERNACIONAL",
+        "polygon_m": [[4.8, 14.25], [7.7, 14.25], [7.7, 17.05], [4.8, 17.05]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "jefe-recursos-humanos",
+        "name": "JEFE DE RR.HH.",
+        "polygon_m": [[7.7, 14.25], [10.6, 14.25], [10.6, 17.05], [7.7, 17.05]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "oficina",
+        "name": "OFICINA",
+        "polygon_m": [[10.6, 13.35], [12.55, 13.35], [12.55, 17.05], [10.6, 17.05]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "zona-de-reuniones",
+        "name": "ZONA DE REUNIONES",
+        "polygon_m": [[12.55, 13.35], [17.8, 13.35], [17.8, 17.05], [12.55, 17.05]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "archivo-general",
+        "name": "ARCHIVO GENERAL",
+        "polygon_m": [[19.8, 20.55], [22.65, 20.55], [22.65, 22.1], [19.8, 22.1]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ascensor-materiales",
+        "name": "ASCENSOR MATERIALES",
+        "polygon_m": [[19.85, 18.85], [22.65, 18.85], [22.65, 20.45], [19.85, 20.45]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ascensor-personal",
+        "name": "ASCENSOR PERSONAL",
+        "polygon_m": [[19.85, 17.15], [22.65, 17.15], [22.65, 18.75], [19.85, 18.75]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "escalera",
+        "name": "ESCALERA",
+        "polygon_m": [[19.85, 12.45], [22.56, 12.45], [22.56, 17.0], [19.42, 17.0], [19.42, 15.65], [19.85, 15.65]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes",
+        "name": "DUCTO DE MONTANTES",
+        "polygon_m": [[19.42, 11.14], [21.07, 11.14], [21.07, 11.45], [21.29, 11.45], [21.29, 12.3], [19.42, 12.3]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "service-shaft-crossed",
+        "name": "CROSSED SERVICE SHAFT (FUNCTION UNSPECIFIED)",
+        "polygon_m": [[21.56, 11.14], [22.62, 11.14], [22.62, 12.35], [21.56, 12.35]],
+        "service_space": {"symbol": "crossed", "function": "unspecified"},
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      }
+    ],
+    "partitions": [
+      {
+        "id": "west-restroom-north",
+        "start_m": [0.15, 18.9], "end_m": [3.65, 18.9],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-restroom-south",
+        "start_m": [0.15, 17.65], "end_m": [1.45, 17.65],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster solid wall linework"
+      },
+      {
+        "id": "west-restroom-south-step",
+        "start_m": [1.45, 17.65], "end_m": [1.45, 17.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster solid wall linework"
+      },
+      {
+        "id": "west-restroom-south-east",
+        "start_m": [1.45, 17.35], "end_m": [3.65, 17.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster solid wall linework"
+      },
+      {
+        "id": "west-restroom-east",
+        "start_m": [3.65, 17.35], "end_m": [3.65, 18.9],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-sh-gerencia", "kind": "door", "from_m": 0.15, "to_m": 0.95, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-excellence-north",
+        "start_m": [-0.35, 16.9], "end_m": [0, 16.9],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster; solid west return only; dashed continuation is not wall geometry"
+      },
+      {
+        "id": "west-commercial-north",
+        "start_m": [-0.35, 14.45], "end_m": [3.65, 14.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-operations-north",
+        "start_m": [-0.35, 11.65], "end_m": [3.65, 11.65],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-technical-north",
+        "start_m": [-0.35, 8.1], "end_m": [3.65, 8.1],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-grid3-boundary",
+        "start_m": [-0.35, 5.65], "end_m": [3.65, 5.65],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster; aligned to directly dimensioned grid 3"
+      },
+      {
+        "id": "west-office-spine",
+        "start_m": [3.65, 5.65], "end_m": [3.65, 17.01],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-gerente-tecnico", "kind": "door", "from_m": 0.5, "to_m": 1.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-gerente-operaciones", "kind": "door", "from_m": 3.9, "to_m": 4.7, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-gerente-comercial", "kind": "door", "from_m": 6.5, "to_m": 7.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-gerente-excelencia", "kind": "door", "from_m": 9.55, "to_m": 10.35, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-room-south-wall",
+        "start_m": [4.8, 18.45], "end_m": [16.1, 18.45],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-director-west", "kind": "door", "from_m": 1.5, "to_m": 2.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-director-center", "kind": "door", "from_m": 5.0, "to_m": 5.8, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-recursos-humanos", "kind": "door", "from_m": 8.9, "to_m": 9.7, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-room-west",
+        "start_m": [4.8, 18.45], "end_m": [4.8, 22.68],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-room-divider-west-center",
+        "start_m": [8.1, 18.45], "end_m": [8.1, 22.68],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-room-divider-center-hr",
+        "start_m": [12.4, 18.45], "end_m": [12.4, 22.68],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-room-east",
+        "start_m": [16.1, 18.45], "end_m": [16.1, 22.68],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-pasadizo-south-edge",
+        "start_m": [4.8, 17.05], "end_m": [16.1, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-jefe-rrhh-north", "kind": "door", "from_m": 3.0, "to_m": 3.9, "source": "scale-traced approximate/non-constructive from PDF raster; hinge beside the x≈7.7 divider"},
+          {"name": "door-oficina-north-pasadizo", "kind": "door", "from_m": 6.75, "to_m": 7.55, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "central-office-west",
+        "start_m": [10.6, 13.35], "end_m": [10.6, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "central-office-south",
+        "start_m": [10.6, 13.35], "end_m": [12.55, 13.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "central-office-meeting-divider",
+        "start_m": [12.55, 13.35], "end_m": [12.55, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "meeting-room-south",
+        "start_m": [12.55, 13.35], "end_m": [17.8, 13.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "meeting-room-east",
+        "start_m": [17.8, 13.35], "end_m": [17.8, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "meeting-room-north-extension",
+        "start_m": [16.1, 17.05], "end_m": [17.8, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-zona-reuniones-north-pasadizo", "kind": "door", "from_m": 0.7, "to_m": 1.699, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "marketing-internacional-south",
+        "start_m": [4.8, 14.25], "end_m": [7.7, 14.25],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "marketing-internacional-west",
+        "start_m": [4.8, 14.25], "end_m": [4.8, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-marketing-internacional-west", "kind": "door", "from_m": 0.05, "to_m": 0.95, "source": "scale-traced approximate/non-constructive from PDF raster; hinge at the lower jamb"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "marketing-jefe-rrhh-divider",
+        "start_m": [7.7, 14.25], "end_m": [7.7, 17.05],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "jefe-rrhh-south",
+        "start_m": [7.7, 14.25], "end_m": [10.6, 14.25],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "archivo-general-west",
+        "start_m": [19.8, 20.55], "end_m": [19.8, 22.1],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [{"name": "door-archivo-general-west", "kind": "door", "from_m": 0.45, "to_m": 1.25, "source": "scale-traced approximate/non-constructive from PDF raster; visible west-wall door"}],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "archivo-general-south",
+        "start_m": [19.8, 20.55], "end_m": [22.65, 20.55],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "archivo-general-east",
+        "start_m": [22.65, 20.55], "end_m": [22.65, 22.1],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "archivo-general-north",
+        "start_m": [19.8, 22.1], "end_m": [22.65, 22.1],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "elevator-core-west",
+        "start_m": [19.85, 17.15], "end_m": [19.85, 20.45],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-ascensor-personal-west", "kind": "door", "from_m": 0.25, "to_m": 1.05, "source": "scale-traced approximate/non-constructive from PDF raster; visible elevator entrance"},
+          {"name": "door-ascensor-materiales-west", "kind": "door", "from_m": 2.1, "to_m": 2.9, "source": "scale-traced approximate/non-constructive from PDF raster; visible elevator entrance"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "elevator-core-east",
+        "start_m": [22.65, 17.15], "end_m": [22.65, 20.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "elevator-core-south",
+        "start_m": [19.85, 17.15], "end_m": [22.65, 17.15],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "elevator-core-north",
+        "start_m": [19.85, 20.45], "end_m": [22.65, 20.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "elevator-core-divider",
+        "start_m": [19.85, 18.8], "end_m": [22.65, 18.8],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-west",
+        "start_m": [19.85, 12.45], "end_m": [19.85, 15.65],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [{"name": "door-stair-enclosure-west", "kind": "door", "from_m": 2.3, "to_m": 3.1, "source": "scale-traced approximate/non-constructive from PDF raster; visible stair entrance"}],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-west-landing-step",
+        "start_m": [19.85, 15.65], "end_m": [19.42, 15.65],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-west-landing",
+        "start_m": [19.42, 15.65], "end_m": [19.42, 17.0],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-east",
+        "start_m": [22.56, 12.45], "end_m": [22.56, 17.0],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-south",
+        "start_m": [19.85, 12.45], "end_m": [22.56, 12.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "stair-enclosure-north",
+        "start_m": [19.42, 17.0], "end_m": [22.56, 17.0],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-west",
+        "start_m": [19.42, 11.14], "end_m": [19.42, 12.3],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-south-east-step",
+        "start_m": [21.07, 11.14], "end_m": [21.07, 11.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-east-step",
+        "start_m": [21.07, 11.45], "end_m": [21.29, 11.45],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-east",
+        "start_m": [21.29, 11.45], "end_m": [21.29, 12.3],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-south",
+        "start_m": [19.42, 11.14], "end_m": [21.07, 11.14],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "ducto-de-montantes-north",
+        "start_m": [19.42, 12.3], "end_m": [21.29, 12.3],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "crossed-service-shaft-west",
+        "start_m": [21.56, 11.14], "end_m": [21.56, 12.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "crossed-service-shaft-east",
+        "start_m": [22.62, 11.14], "end_m": [22.62, 12.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "crossed-service-shaft-north",
+        "start_m": [21.56, 12.35], "end_m": [22.62, 12.35],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      }
+    ],
+    "circulation": [
+      {
+        "id": "west-office-access",
+        "name": "West office access corridor",
+        "polygon_m": [[3.65, 5.65], [4.8, 5.65], [4.8, 17.01], [3.65, 17.01]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "northwest-connector",
+        "name": "Northwest connecting passage",
+        "polygon_m": [[3.65, 17.01], [4.8, 17.01], [4.8, 18.9], [3.65, 18.9]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-pasadizo",
+        "name": "North perimeter pasadizo",
+        "polygon_m": [[4.8, 17.05], [16.1, 17.05], [16.1, 18.45], [4.8, 18.45]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "central-north-connector",
+        "name": "Central connecting passage south of north-edge offices",
+        "polygon_m": [[4.8, 13.35], [10.6, 13.35], [10.6, 14.19], [4.8, 14.19]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "north-pasadizo-t3b-extension",
+        "name": "North pasadizo extension serving meeting-room NE door",
+        "polygon_m": [[16.1, 17.05], [18.3, 17.05], [18.3, 18.45], [16.1, 18.45]],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "east-pasadizo-connector",
+        "name": "East-side passage through waiting hall to stair approach and row-4 seam",
+        "polygon_m": [[17.8, 11.1], [19.36, 11.1], [19.36, 22.1], [17.8, 22.1]],
+        "source": "scale-traced approximate/non-constructive from PDF raster; clear west of lift and stair enclosures"
+      },
+      {
+        "id": "stair-core-approach",
+        "name": "Narrow stair-frontage approach connection",
+        "polygon_m": [[19.36, 14.75], [19.79, 14.75], [19.79, 15.55], [19.36, 15.55]],
+
+        "source": "scale-traced approximate/non-constructive from PDF raster; meets the stair west-wall face at the visible entrance"
+      }
+    ],
+    "zones": [
+      {
+        "id": "pool-de-oficinas",
+        "name": "POOL DE OFICINAS",
+        "kind": "open-circulation",
+        "isEnclosed": false,
+        "polygon_m": [[4.8, 5.65], [16.1, 5.65], [16.1, 9.05], [18.3, 9.05], [18.3, 13.35], [13.05, 13.35], [11.1, 13.35], [4.8, 13.35]],
+        "connectsTo": ["west-office-access", "central-north-connector", "northwest-connector", "north-pasadizo", "east-pasadizo-connector"],
+        "source": "scale-traced approximate/non-constructive from PDF raster; open circulation zone only, not a partitioned room"
+      },
+      {
+        "id": "hall-de-espera",
+        "name": "HALL DE ESPERA",
+        "kind": "open-circulation",
+        "isEnclosed": false,
+        "polygon_m": [[16.1, 17.05], [19.7, 17.05], [19.7, 22.1], [16.1, 22.1]],
+        "connectsTo": ["north-pasadizo-t3b-extension", "east-pasadizo-connector", "stair-core-approach"],
+        "source": "scale-traced approximate/non-constructive from PDF raster; open lobby area, not an enclosed room"
+      }
+    ]
+  }
+}
