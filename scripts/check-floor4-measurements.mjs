@@ -108,7 +108,7 @@ check(matchesDimension(t3b?.map_grid_relative_x_to_plan_offset_m, 0)
   && samePair(register.visual_evidence_approximate?.west_offset_x_m, [-0.5, 0]),
 "T3B must use A=0/F=22.85 while recording the west spur separately at x≈−0.50 m");
 check(samePair(estimates?.oficina_bounds?.min_m, [10.6, 13.35]) && samePair(estimates?.oficina_bounds?.max_m, [12.55, 17.05])
-  && samePair(estimates?.meeting_bounds?.min_m, [12.55, 13.35]) && samePair(estimates?.meeting_bounds?.max_m, [17.8, 17.05])
+  && samePair(estimates?.meeting_bounds?.min_m, [12.55, 13.35]) && samePair(estimates?.meeting_bounds?.max_m, [18.0, 17.05])
   && samePair(estimates?.gerente_marketing_internacional_bounds?.min_m, [4.8, 14.25])
   && samePair(estimates?.gerente_marketing_internacional_bounds?.max_m, [7.7, 17.05])
   && samePair(estimates?.jefe_rrhh_bounds?.min_m, [7.7, 14.25])
@@ -132,7 +132,12 @@ check(matchesDimension(estimates?.partition_thickness_m, 0.12)
   && samePair(estimates?.jefe_rrhh_north_door_x_m, [7.8, 8.7]),
 "T3B approximate partitions, corrected room doors, NE meeting door, and east-core connector must be registered");
 check(typeof t3b?.dimensionReadability === "string" && t3b.dimensionReadability.includes("no room-specific")
-  && typeof t3b?.coordinateStatus === "string" && t3b.coordinateStatus.includes("approximate") && t3b.coordinateStatus.includes("non-constructive"),
+  && typeof t3b?.coordinateStatus === "string" && t3b.coordinateStatus.includes("approximate") && t3b.coordinateStatus.includes("non-constructive")
+  && t3b.coordinateStatus.includes("u≈18.0 m") && t3b.coordinateStatus.includes("not a dimensioned survey value")
+  && typeof t3b?.partition_interpretation === "string"
+  && t3b.partition_interpretation.includes("thick black space-divider lines")
+  && t3b.partition_interpretation.includes("translucent acrylic partitions")
+  && t3b.partition_interpretation.includes("does not add material rendering"),
 "T3B must distinguish unreadable room dimensions from approximate, non-constructive raster traces");
 check(Array.isArray(t3b?.scale_traced_features) && ["open pool-zone outline", "meeting-room boundary", "adjacent-office boundary", "enclosed Marketing International manager room", "enclosed HR chief room", "partitions", "door gaps", "circulation connections", "north-pasadizo extension", "east-core-edge connector"].every((feature) => t3b.scale_traced_features.includes(feature)),
 "T3B register must identify all raster-traced room, partition, opening, and circulation features");
@@ -225,7 +230,7 @@ check(samePair(t3cEstimates?.stair_enclosure_bounds?.min_m, [19.42, 12.45])
   && samePair(t3cEstimates?.stair_frontage_approach_bounds?.max_m, [19.79, 15.55])
   && samePair(t3cEstimates?.door_gaps?.stair_enclosure_west, [14.75, 15.55])
   && samePair(stairDoorAbsoluteY, [14.75, 15.55]) && stairDoorFitsSegment(stairWestWall, stairDoor)
-  && samePair(t3cEstimates?.east_core_circulation_bounds?.min_m, [17.8, 11.1])
+  && samePair(t3cEstimates?.east_core_circulation_bounds?.min_m, [18.0, 11.1])
   && samePair(t3cEstimates?.east_core_circulation_bounds?.max_m, [19.36, 22.1]),
 "T3C stair register must record a 1.35 m/approximately 30% recess and a door fully inside one connected west-wall segment");
 check(samePair(ductBounds?.min_m, [19.42, 11.14])
@@ -315,6 +320,42 @@ for (const [room, expected] of registeredRooms) {
   check(samePair(actual?.min_m, expected?.min_m) && samePair(actual?.max_m, expected?.max_m),
     `${room?.id ?? "T3B room"} must match its registered approximate plan-frame boundaries`);
 }
+const meetingPlanRoom = planRoom("zona-de-reuniones");
+const meetingPlanBounds = polygonBounds(meetingPlanRoom?.polygon_m);
+const meetingWestWall = (planInterior?.partitions ?? []).find((partition) => partition?.id === "central-office-meeting-divider");
+const meetingSouthWall = (planInterior?.partitions ?? []).find((partition) => partition?.id === "meeting-room-south");
+const meetingEastWall = (planInterior?.partitions ?? []).find((partition) => partition?.id === "meeting-room-east");
+const meetingNorthWallForGeometry = (planInterior?.partitions ?? []).find((partition) => partition?.id === "meeting-room-north-extension");
+const meetingDividerWalls = [meetingWestWall, meetingSouthWall, meetingEastWall, meetingNorthWallForGeometry];
+const meetingConnector = planInterior?.circulation?.find((path) => path?.id === "east-pasadizo-connector");
+const meetingConnectorBounds = polygonBounds(meetingConnector?.polygon_m);
+const registeredMeetingBounds = estimates?.meeting_bounds;
+const registeredEastConnectorBounds = t3cEstimates?.east_core_circulation_bounds;
+const meetingRegionOverlap = meetingPlanBounds && meetingConnectorBounds
+  && Math.min(meetingPlanBounds.max_m[0], meetingConnectorBounds.max_m[0]) > Math.max(meetingPlanBounds.min_m[0], meetingConnectorBounds.min_m[0])
+  && Math.min(meetingPlanBounds.max_m[1], meetingConnectorBounds.max_m[1]) > Math.max(meetingPlanBounds.min_m[1], meetingConnectorBounds.min_m[1]);
+check(JSON.stringify(meetingPlanRoom?.polygon_m) === JSON.stringify([[12.55, 13.35], [18.0, 13.35], [18.0, 17.05], [12.55, 17.05]])
+  && JSON.stringify(registeredMeetingBounds?.min_m) === JSON.stringify([12.55, 13.35])
+  && JSON.stringify(registeredMeetingBounds?.max_m) === JSON.stringify([18.0, 17.05])
+  && JSON.stringify(meetingWestWall?.start_m) === JSON.stringify([12.55, 13.35])
+  && JSON.stringify(meetingWestWall?.end_m) === JSON.stringify([12.55, 17.05])
+  && JSON.stringify(meetingSouthWall?.start_m) === JSON.stringify([12.55, 13.35])
+  && JSON.stringify(meetingSouthWall?.end_m) === JSON.stringify([18.0, 13.35])
+  && JSON.stringify(meetingEastWall?.start_m) === JSON.stringify([18.0, 13.35])
+  && JSON.stringify(meetingEastWall?.end_m) === JSON.stringify([18.0, 17.05])
+  && JSON.stringify(meetingNorthWallForGeometry?.start_m) === JSON.stringify([16.1, 17.05])
+  && JSON.stringify(meetingNorthWallForGeometry?.end_m) === JSON.stringify([18.0, 17.05])
+  && meetingDividerWalls.every((wall) => wall?.thickness_m === 0.12 && wall?.height_m === 2.4
+    && typeof wall?.source === "string" && wall.source.includes("approximate/non-constructive")
+    && wall.source.includes("translucent acrylic partition"))
+  && meetingSouthWall?.openings?.length === 0 && meetingEastWall?.openings?.length === 0,
+"T3R-MRE meeting enclosure must have coordinated approximate u≈18.0 m bounds, unchanged wall dimensions, and acrylic-partition provenance");
+check(JSON.stringify(meetingConnector?.polygon_m) === JSON.stringify([[18.0, 11.1], [19.36, 11.1], [19.36, 22.1], [18.0, 22.1]])
+  && JSON.stringify(registeredEastConnectorBounds?.min_m) === JSON.stringify([18.0, 11.1])
+  && JSON.stringify(registeredEastConnectorBounds?.max_m) === JSON.stringify([19.36, 22.1])
+  && meetingPlanBounds?.max_m?.[0] === meetingConnectorBounds?.min_m?.[0]
+  && !meetingRegionOverlap,
+"T3R-MRE meeting-room and east-connector regions must adjoin at u≈18.0 m without plan-region overlap");
 const poolZone = (planInterior?.zones ?? []).find((area) => area?.id === "pool-de-oficinas");
 const actualPoolBounds = polygonBounds(poolZone?.polygon_m);
 check(samePair(actualPoolBounds?.min_m, estimates?.pool_bounds?.min_m)
@@ -394,9 +435,12 @@ const meetingDoorX = [
 check(matchesDimension(northOpenings.get("door-oficina-north-pasadizo")?.to_m - northOpenings.get("door-oficina-north-pasadizo")?.from_m, estimates?.door_widths_m?.office_north_pasadizo)
   && matchesDimension(meetingNorthDoor?.to_m - meetingNorthDoor?.from_m, estimates?.door_widths_m?.meeting_north_pasadizo)
   && samePair(meetingDoorX, estimates?.meeting_north_door_x_m)
+  && JSON.stringify(estimates?.meeting_north_door_x_m) === JSON.stringify([16.8, 17.8])
+  && meetingNorthWall?.start_m?.[0] === 16.1 && meetingNorthWall?.end_m?.[0] === 18.0
+  && meetingNorthDoor?.kind === "door" && meetingNorthDoor?.from_m === 0.7 && meetingNorthDoor?.to_m === 1.699
   && meetingNorthWall?.start_m?.[1] === 17.05 && meetingNorthWall?.end_m?.[1] === 17.05
   && !northOpenings.has("door-zona-reuniones-north-pasadizo"),
-"T3B registered opening widths and northeast meeting-door position must match the raster-traced north wall");
+"T3R-MRE must extend the north wall while preserving the exact north-door offsets, approximate position, and registered width");
 
 const visual = register.visual_evidence_approximate;
 check(visual?.north_ledge_beyond_grid_7_m === 0.6, "approximate north ledge must extend 0.60 m beyond grid 7");

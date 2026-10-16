@@ -27,6 +27,10 @@ PALETTE = {
     "elevator": (0.28, 0.43, 0.47, 1.0),
     "desk": (0.48, 0.34, 0.23, 1.0),
     "table": (0.62, 0.48, 0.29, 1.0),
+    "concrete": (0.72, 0.72, 0.70, 1.0),
+    "glass": (0.62, 0.80, 0.90, 0.35),
+    "frosted": (0.90, 0.93, 0.94, 0.7),
+    "aluminum": (0.06, 0.06, 0.07, 1.0),
 }
 
 
@@ -159,13 +163,13 @@ def _partition_boxes(plan):
             raise ValueError(f"partition {partition_id!r} must have finite centerline endpoints")
         if not isinstance(thickness, (int, float)) or not math.isfinite(thickness) or thickness <= 0:
             raise ValueError(f"partition {partition_id!r} must have positive finite thickness")
-        is_central_office_partial_wall = partition_id == "central-office-south"
+        annotated_height = partition.get("annotatedHeight_m")
         valid_height = isinstance(height, (int, float)) and math.isfinite(height) and (
-            height == 1.6 if is_central_office_partial_wall else height >= 2.4
+            height == annotated_height and 0 < height < 2.4 if annotated_height is not None else height >= 2.4
         )
         if not valid_height:
-            if is_central_office_partial_wall:
-                raise ValueError("partition 'central-office-south' must be exactly 1.60 m high")
+            if annotated_height is not None:
+                raise ValueError(f"partition {partition_id!r} must match its annotated {annotated_height} m partial height")
             raise ValueError(f"partition {partition_id!r} must be at least 2.40 m high")
         if not isinstance(openings, list):
             raise ValueError(f"partition {partition_id!r} must list its openings")
@@ -176,6 +180,7 @@ def _partition_boxes(plan):
             raise ValueError(f"partition {partition_id!r} must have a non-zero centerline")
         ux, uy = dx / length, dy / length
         angle = math.atan2(dy, dx)
+        boundary_tolerance = 1e-9
         for opening in openings:
             if not isinstance(opening, dict):
                 raise ValueError(f"partition {partition_id!r} has an invalid opening")
@@ -194,7 +199,9 @@ def _partition_boxes(plan):
                 or not math.isfinite(opening_to)
                 or opening_from < 0
                 or opening_to <= opening_from
-                or opening_to > length
+                or opening_from > length + boundary_tolerance
+                or opening_to > length + boundary_tolerance
+                or min(opening_to, length) <= min(opening_from, length)
             ):
                 raise ValueError(f"opening {opening_name!r} is outside its partition centerline")
 
@@ -202,7 +209,8 @@ def _partition_boxes(plan):
         cursor = 0.0
         segment_index = 0
         for opening in ordered:
-            opening_from, opening_to = opening["from_m"], opening["to_m"]
+            opening_from = min(opening["from_m"], length)
+            opening_to = min(opening["to_m"], length)
             if opening_from < cursor:
                 raise ValueError(f"opening {opening['name']!r} overlaps another partition opening")
             if opening_from > cursor:
@@ -252,15 +260,81 @@ def _validate_plan(plan):
         angle = box.get("angle", 0.0)
         if not isinstance(angle, (int, float)) or not math.isfinite(angle):
             raise ValueError(f"{box['name']} has a non-finite angle")
+        z0 = box.get("z0", 0.0)
+        if not isinstance(z0, (int, float)) or not math.isfinite(z0) or z0 < 0:
+            raise ValueError(f"{box['name']} has an invalid base elevation")
+    for prism in plan.get("prisms", []):
+        if prism.get("material") not in PALETTE or not isinstance(prism.get("collidable"), bool):
+            raise ValueError(f"{prism.get('name')} has an unsupported material or collision flag")
+        if not (isinstance(prism.get("z"), list) and len(prism["z"]) == 2 and 0 <= prism["z"][0] < prism["z"][1]):
+            raise ValueError(f"{prism.get('name')} must have 0 <= z0 < z1")
 
 
-def _prepare_checkpoint_plan(plan):
+def _vector_partition_boxes(walls):
+    """Boxes for vector partitions: frosted glass, clear glass, or frosted below / clear above. Doorways stay open."""
+    heights = walls["heights_m"]
+    split = heights.get("splitAcrylic")
+    layers = {
+        "frosted": lambda h: [("frosted", 0.0, h)],
+        "glass": lambda h: [("glass", 0.0, h)],
+        "frosted-clear": lambda h: [("frosted", 0.0, split), ("glass", split, h - split)],
+    }
+    boxes = []
+    pieces = [(p, layers[p["kind"]](p["height_m"])) for p in walls.get("partitions", [])]
+    for item, item_layers in pieces:
+        (x0, y0), (x1, y1) = item["start_m"], item["end_m"]
+        length = math.hypot(x1 - x0, y1 - y0)
+        if length == 0:
+            raise ValueError(f"vector partition {item['id']!r} must have a non-zero centerline")
+        for index, (material, z0, height) in enumerate(item_layers):
+            if not (isinstance(height, (int, float)) and height > 0):
+                raise ValueError(f"vector partition {item['id']!r} has an invalid layer height")
+            box = _partition_wall_box(item["id"], index, item["start_m"], (x1 - x0) / length, (y1 - y0) / length,
+                                      0.0, length, item["thickness_m"], height, math.atan2(y1 - y0, x1 - x0))
+            box.update(name=f"{item['id']}_{material}", material=material, z0=z0)
+            boxes.append(box)
+    return boxes
+
+
+def _vector_wall_prisms(walls):
+    heights = walls.get("heights_m", {})
+    clear, sill, head = heights.get("clear"), heights.get("windowSill"), heights.get("windowHead")
+    if not all(isinstance(h, (int, float)) and math.isfinite(h) for h in (clear, sill, head)) or not 0 < sill < head < clear:
+        raise ValueError("vector walls need finite heights with 0 < sill < head < clear")
+    prisms = [
+        {"name": solid["id"], "polygon": solid["polygon_m"],
+         "z": [0, heights["lowDrywall"] if solid["kind"] == "low-drywall" else clear],
+         "material": {"concrete": "concrete", "drywall": "partition", "low-drywall": "wall"}[solid["kind"]], "collidable": True}
+        for solid in walls["solids"]
+    ]
+    prisms += [
+        {"name": post["id"], "polygon": post["polygon_m"], "z": [0, post.get("height_m", clear)], "material": "aluminum", "collidable": True}
+        for post in walls.get("posts", [])
+    ]
+    for window in walls["windows"]:
+        for kind, z, material in (("parapet", [0, sill], "wall"), ("glass", [sill, head], "glass"), ("lintel", [head, clear], "wall")):
+            prisms.append({"name": f"{window['id']}_{kind}", "polygon": window["polygon_m"], "z": z, "material": material, "collidable": True})
+    for prism in prisms:
+        ring = prism["polygon"]
+        valid = isinstance(ring, list) and len(ring) >= 3 and all(_finite_pair(p) for p in ring)
+        if not valid or abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:] + ring[:1]))) < 1e-6:
+            raise ValueError(f"vector wall {prism['name']!r} must be a non-degenerate polygon")
+    return prisms
+
+
+def _prepare_checkpoint_plan(plan, walls=None):
     if not isinstance(plan, dict):
         _validate_plan(plan)
     if plan.get("stage") == "west-north-interior":
         if "boxes" in plan:
             raise ValueError("canonical cumulative plan must not contain generated box geometry")
-        plan["boxes"] = _shell_boxes(plan) + _partition_boxes(plan)
+        if walls is None:
+            plan["boxes"] = _shell_boxes(plan) + _partition_boxes(plan)
+        else:
+            # PDF vector walls and partitions replace the simplified shell and the raster-traced partitions.
+            plan["prisms"] = _vector_wall_prisms(walls)
+            plan["boxes"] = _vector_partition_boxes(walls)
+            plan["floorOutline"] = walls.get("floor_m", plan["floorOutline"])
     _validate_plan(plan)
 
 
@@ -283,14 +357,23 @@ def _material(name, prefix):
     if shader:
         shader.inputs["Base Color"].default_value = material.diffuse_color
         shader.inputs["Roughness"].default_value = 0.82
+        if material.diffuse_color[3] < 1.0:
+            shader.inputs["Alpha"].default_value = material.diffuse_color[3]
+            # Clear glass stays glossy; frosted tempered glass reads as a diffusing panel.
+            shader.inputs["Roughness"].default_value = 0.05 if name == "glass" else 0.6
+            if hasattr(material, "surface_render_method"):
+                material.surface_render_method = "BLENDED"
+            else:
+                material.blend_method = "BLEND"
     return material
 
 
-def _make_floor(plan, collection, material, prefix):
+def _make_floor(plan, collection, material, prefix, north_sign=-1):
     mesh = bpy.data.meshes.new(f"{prefix}_FloorMesh")
-    vertices = [(x, -north, 0.0) for x, north in plan["floorOutline"]]
-    # Reversing the reflected plan winding keeps the Blender floor normal upward.
-    mesh.from_pydata(vertices, [], [list(reversed(range(len(vertices))))])
+    vertices = [(x, north_sign * north, 0.0) for x, north in plan["floorOutline"]]
+    # Wind the floor counterclockwise in Blender XY so its normal points up in either north convention.
+    order = list(range(len(vertices)))
+    mesh.from_pydata(vertices, [], [order if _ring_is_counterclockwise(vertices) else list(reversed(order))])
     mesh.materials.append(material)
     mesh.update()
     obj = bpy.data.objects.new(f"{prefix}_Floor", mesh)
@@ -299,7 +382,12 @@ def _make_floor(plan, collection, material, prefix):
     return obj, f"{COLLECTION_NAME}_Floor"
 
 
-def _make_box_batches(plan, collection, materials, prefix):
+def _ring_is_counterclockwise(ring):
+    return sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:] + ring[:1])) > 0
+
+
+def _make_box_batches(plan, collection, materials, prefix, north_sign=-1):
+    """north_sign=-1 keeps the legacy demo's reflected frame; +1 keeps the plan's handedness (floor-4 checkpoints)."""
     batches = {}
     for box in plan["boxes"]:
         key = (box["material"], box["collidable"])
@@ -309,7 +397,7 @@ def _make_box_batches(plan, collection, materials, prefix):
         verts = bmesh.ops.create_cube(bm, size=1.0)["verts"]
         width, depth = box["size"]
         bmesh.ops.scale(bm, vec=Vector((width, depth, box["height"])), verts=verts)
-        angle = -box.get("angle", 0.0)
+        angle = north_sign * box.get("angle", 0.0)
         if angle:
             bmesh.ops.rotate(
                 bm,
@@ -320,9 +408,24 @@ def _make_box_batches(plan, collection, materials, prefix):
         east, north = box["center"]
         bmesh.ops.translate(
             bm,
-            vec=Vector((east, -north, box["height"] / 2.0)),
+            vec=Vector((east, north_sign * north, box.get("z0", 0.0) + box["height"] / 2.0)),
             verts=verts,
         )
+    for prism in plan.get("prisms", []):
+        key = (prism["material"], prism["collidable"])
+        bm = batches.get(key)
+        if bm is None:
+            bm = batches[key] = bmesh.new()
+        z0, z1 = prism["z"]
+        face = bm.faces.new([bm.verts.new((east, north_sign * north, z0)) for east, north in prism["polygon"]])
+        extruded = bmesh.ops.extrude_face_region(bm, geom=[face])["geom"]
+        bmesh.ops.translate(
+            bm, vec=Vector((0.0, 0.0, z1 - z0)),
+            verts=[element for element in extruded if isinstance(element, bmesh.types.BMVert)],
+        )
+    for bm in batches.values():
+        # Prism rings arrive in either winding; recalculating keeps every face pointing outward.
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
 
     objects = []
     try:
@@ -847,7 +950,7 @@ def _publish_checkpoint_file(source, target, source_dir_fd=None, target_dir_fd=N
 
 
 def _checkpoint_object_names(plan, prefix):
-    groups = {(box["material"], box["collidable"]) for box in plan["boxes"]}
+    groups = {(item["material"], item["collidable"]) for item in plan["boxes"] + plan.get("prisms", [])}
     return {f"{prefix}_Floor"} | {
         f"{prefix}_{material}_{'Blocking' if collidable else 'Decor'}"
         for material, collidable in groups
@@ -886,7 +989,7 @@ def _close_checkpoint_directory(directory_fd):
         os.close(directory_fd)
 
 
-def _main_checkpoint(plan_path, checkpoint_name):
+def _main_checkpoint(plan_path, checkpoint_name, walls_path=None):
     if bpy.context.mode != "OBJECT":
         return _result("blocked", "Blender must be in Object Mode; no scene changes made.")
     if not hasattr(bpy.ops.export_scene, "gltf"):
@@ -911,7 +1014,13 @@ def _main_checkpoint(plan_path, checkpoint_name):
             raise FileExistsError("A checkpoint GLB or BLEND already exists; neither file was overwritten.")
         with source_path.open(encoding="utf-8") as source:
             plan = json.load(source)
-        _prepare_checkpoint_plan(plan)
+        walls = None
+        if walls_path is not None:
+            walls_source = Path(walls_path)
+            walls_source = (walls_source if walls_source.is_absolute() else root / walls_source).resolve()
+            with walls_source.open(encoding="utf-8") as source:
+                walls = json.load(source)
+        _prepare_checkpoint_plan(plan, walls)
         prefix = f"Floor4_{checkpoint_name}"
         if bpy.data.collections.get(prefix):
             raise ValueError(f"Collection {prefix!r} already exists; no scene changes made.")
@@ -944,10 +1053,10 @@ def _main_checkpoint(plan_path, checkpoint_name):
         bpy.context.scene.collection.children.link(created_collection)
         materials = {
             name: _material(name, prefix)
-            for name in sorted({box["material"] for box in plan["boxes"]})
+            for name in sorted({item["material"] for item in plan["boxes"] + plan.get("prisms", [])})
         }
-        objects.append(_make_floor(plan, created_collection, _material("floor", prefix), prefix))
-        objects.extend(_make_box_batches(plan, created_collection, materials, prefix))
+        objects.append(_make_floor(plan, created_collection, _material("floor", prefix), prefix, north_sign=1))
+        objects.extend(_make_box_batches(plan, created_collection, materials, prefix, north_sign=1))
         try:
             byte_count = _export_objects(objects, temp_asset)
         finally:
@@ -1004,11 +1113,11 @@ def _main_checkpoint(plan_path, checkpoint_name):
         asset=str(target_glb),
         blend=str(target_blend),
         bytes=byte_count,
-        blenderToThree="(east, -north, up) -> (east, up, north)",
+        blenderToThree="(u, v, up) -> (u, up, -v); plan handedness preserved",
     )
 
 
-def main(replace=False, plan_path=None, checkpoint_name=None):
+def main(replace=False, plan_path=None, checkpoint_name=None, walls_path=None):
     """Create OfficeDemo, or create a non-overwriting explicit-plan checkpoint."""
     if not isinstance(replace, bool):
         return _result("blocked", "replace must be the explicit boolean True or False.")
@@ -1017,7 +1126,7 @@ def main(replace=False, plan_path=None, checkpoint_name=None):
             return _result("blocked", "replace is not available in checkpoint mode.")
         if plan_path is None or checkpoint_name is None:
             return _result("blocked", "checkpoint mode requires both plan_path and checkpoint_name.")
-        return _main_checkpoint(plan_path, checkpoint_name)
+        return _main_checkpoint(plan_path, checkpoint_name, walls_path)
     if bpy.context.mode != "OBJECT":
         return _result("blocked", "Blender must be in Object Mode; no scene changes made.")
     if not hasattr(bpy.ops.export_scene, "gltf"):

@@ -118,7 +118,7 @@
     },
     "trace_estimates_approximate_m": {
       "oficina_bounds": {"min_m": [10.6, 13.35], "max_m": [12.55, 17.05]},
-      "meeting_bounds": {"min_m": [12.55, 13.35], "max_m": [17.8, 17.05]},
+      "meeting_bounds": {"min_m": [12.55, 13.35], "max_m": [18.0, 17.05]},
       "gerente_marketing_internacional_bounds": {"min_m": [4.8, 14.25], "max_m": [7.7, 17.05]},
       "jefe_rrhh_bounds": {"min_m": [7.7, 14.25], "max_m": [10.6, 17.05]},
       "marketing_west_door_y_m": [14.3, 15.2],
@@ -164,7 +164,8 @@
       "east-core-edge connector"
     ],
     "dimensionReadability": "Grid-chain dimensions remain readable; no room-specific T3B dimensions were legible in the provided raster, so room boundaries, offsets, thickness, openings, and circulation are estimated.",
-    "coordinateStatus": "T3B room boundaries, raster offsets, partition thickness, opening widths, pool-zone limits, and circulation are approximate, non-constructive, and not suitable for construction; all T3B coordinates use A=0/F=22.85 in the southwest-origin plan frame, while the west exterior spur alone reaches approximately x=-0.50 m."
+    "partition_interpretation": "User clarified that thick black space-divider lines are translucent acrylic partitions; this records their interpretation only and does not add material rendering.",
+    "coordinateStatus": "T3B room boundaries, raster offsets, partition thickness, opening widths, pool-zone limits, and circulation are approximate, non-constructive, and not suitable for construction; all T3B coordinates use A=0/F=22.85 in the southwest-origin plan frame, while the west exterior spur alone reaches approximately x=-0.50 m. The user-directed meeting-room east edge u≈18.0 m is an approximate raster estimate, not a dimensioned survey value."
   },
   "t3c_east": {
     "coordinate_frame": {
@@ -206,7 +207,7 @@
       "ducto_crossed_shaft_bounds_gap_m": 0.27,
       "ducto_crossed_shaft_wall_clearance_m": 0.15,
       "stair_duct_wall_clearance_m": 0.03,
-      "east_core_circulation_bounds": {"min_m": [17.8, 11.1], "max_m": [19.36, 22.1]},
+      "east_core_circulation_bounds": {"min_m": [18.0, 11.1], "max_m": [19.36, 22.1]},
       "stair_frontage_approach_bounds": {"min_m": [19.36, 14.75], "max_m": [19.79, 15.55]},
       "row_4_seam_y_m": 11.1,
       "partition_thickness_m": 0.12,

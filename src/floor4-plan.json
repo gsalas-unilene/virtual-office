@@ -23,9 +23,9 @@
   },
   "traceNotes": {
     "directlyDimensioned": ["grid"],
-    "scaleTraced": ["full exterior outline", "north ledge", "west exterior offset", "northwest chamfer", "east-side perimeter step", "exterior openings", "wall thickness", "T3A west/north room boundaries", "T3A interior partitions and door gaps", "T3A west/north circulation", "T3B central pool and meeting/adjacent-office boundaries", "T3B north-edge office boundaries and connector routes", "T3C east-core rooms, service spaces, and circulation", "T3C crossed-shaft south base strip represented by the east-step shell boundary"],
+    "scaleTraced": ["full exterior outline", "north ledge", "west exterior offset", "northwest chamfer", "east-side perimeter step", "exterior openings", "wall thickness", "T3A west/north room boundaries", "T3A interior partitions and door gaps", "T3A west/north circulation", "T3B central pool and meeting/adjacent-office boundaries", "T3B north-edge office boundaries and connector routes", "T3C east-core rooms, service spaces, and circulation", "T3C crossed-shaft south base strip represented by the east-step shell boundary", "T3D south offices, partial-height runs, and circulation from PDF vector linework"],
     "coordinateStatus": "Undimensioned perimeter, room, partition, partition-thickness, opening, and circulation coordinates are approximate, scale-traced, and non-constructive; T3B/T3C use the A=0 southwest-origin plan frame, while the west spur alone extends approximately to x=-0.50 m; not suitable for construction.",
-    "excluded": "The conflicting lower C-D=5.42 m / D-E=3.85 m chain is not used.",
+    "excluded": "The conflicting lower C-D=5.42 m / D-E=3.85 m chain is not used. T3R excludes archive-general west v=20.55–21.00 m, north-room south u=4.80–6.30 m, west-office spine v=6.95–9.55 m, the ducto west wall, and the stair-enclosure west landing wall; existing door intervals are preserved. Defer the north-room south u=10.60–13.70 door conflict for Claude Code.",
     "sharedBoundaryConvention": "T3C crossed shaft uses the existing east-step shell edge at y=11.10 as its shared south wall; retain the approximate room outline at y=11.14, treat the 0.04 m raster discrepancy as subordinate, and model no separate free strip."
   },
   "floorOutline": [
@@ -136,7 +136,7 @@
     ]
   },
   "interior": {
-    "scope": "Cumulative T3A west/north perimeter rooms, T3B central pool, north-edge offices, meeting room, adjacent office and connector routes, plus T3C east core rooms, service spaces and circulation; excludes T3D south offices and furniture.",
+    "scope": "Cumulative T3A west/north perimeter rooms, T3B central pool, north-edge offices, meeting room, adjacent office and connector routes, T3C east core rooms, service spaces and circulation, plus T3D south offices and circulation; excludes furniture.",
     "wallHeight_m": 2.4,
     "wallThickness_m": 0.12,
     "wallThicknessSource": "scale-traced approximate/non-constructive from PDF raster",
@@ -211,7 +211,7 @@
       {
         "id": "zona-de-reuniones",
         "name": "ZONA DE REUNIONES",
-        "polygon_m": [[12.55, 13.35], [17.8, 13.35], [17.8, 17.05], [12.55, 17.05]],
+        "polygon_m": [[12.55, 13.35], [18.0, 13.35], [18.0, 17.05], [12.55, 17.05]],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
       {
@@ -250,6 +250,66 @@
         "polygon_m": [[21.56, 11.14], [22.62, 11.14], [22.62, 12.35], [21.56, 12.35]],
         "service_space": {"symbol": "crossed", "function": "unspecified"},
         "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "gerencia-administracion-finanzas",
+        "name": "GERENCIA DE ADMINISTRACIÓN Y FINANZAS",
+        "polygon_m": [[0, 2.8], [3.65, 2.8], [3.65, 5.65], [0, 5.65]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "jefe-tesoreria",
+        "name": "JEFE DE TESORERÍA",
+        "polygon_m": [[0, 0], [2.55, 0], [2.55, 2.8], [0, 2.8]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "tesoreria",
+        "name": "TESORERÍA",
+        "polygon_m": [[2.55, 0], [7.15, 0], [7.15, 2.8], [2.55, 2.8]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "contabilidad",
+        "name": "CONTABILIDAD",
+        "polygon_m": [[7.15, 0], [10.6, 0], [10.6, 5.65], [4.8, 5.65], [4.8, 2.8], [7.15, 2.8]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "jefe-ti",
+        "name": "JEFE DE TI",
+        "polygon_m": [[10.6, 0], [13, 0], [13, 2.7], [10.6, 2.7]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "oficina-ti",
+        "name": "OFICINA DE TI",
+        "polygon_m": [[13, 0], [21.43, 0], [21.43, 2.1], [18.36, 2.1], [18.36, 2.7], [13, 2.7]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "gerente-tecnico-east",
+        "name": "GERENTE TÉCNICO (east)",
+        "polygon_m": [[18.36, 2.1], [21.43, 2.1], [21.43, 4.8], [18.36, 4.8]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "jefe-negocios-internacionales",
+        "name": "JEFE DE NEGOCIOS INTERNACIONALES",
+        "polygon_m": [[18.36, 4.8], [21.43, 4.8], [21.43, 6.85], [18.36, 6.85]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "jefe-ventas",
+        "name": "JEFE DE VENTAS",
+        "polygon_m": [[18.36, 6.85], [21.43, 6.85], [21.43, 8.94], [18.36, 8.94]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
+      },
+      {
+        "id": "jefe-gestion-calidad",
+        "name": "JEFE DE GESTIÓN DE CALIDAD",
+        "polygon_m": [[18.36, 8.94], [21.43, 8.94], [21.43, 10.96], [18.36, 10.96]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework"
       }
     ],
     "partitions": [
@@ -317,25 +377,33 @@
         "source": "scale-traced approximate/non-constructive from PDF raster; aligned to directly dimensioned grid 3"
       },
       {
-        "id": "west-office-spine",
-        "start_m": [3.65, 5.65], "end_m": [3.65, 17.01],
+        "id": "west-office-spine-lower",
+        "start_m": [3.65, 5.65], "end_m": [3.65, 6.95],
         "thickness_m": 0.12, "height_m": 2.4,
         "openings": [
-          {"name": "door-gerente-tecnico", "kind": "door", "from_m": 0.5, "to_m": 1.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
-          {"name": "door-gerente-operaciones", "kind": "door", "from_m": 3.9, "to_m": 4.7, "source": "scale-traced approximate/non-constructive from PDF raster"},
-          {"name": "door-gerente-comercial", "kind": "door", "from_m": 6.5, "to_m": 7.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
-          {"name": "door-gerente-excelencia", "kind": "door", "from_m": 9.55, "to_m": 10.35, "source": "scale-traced approximate/non-constructive from PDF raster"}
+          {"name": "door-gerente-tecnico", "kind": "door", "from_m": 0.5, "to_m": 1.3, "source": "scale-traced approximate/non-constructive from PDF raster"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "west-office-spine-upper",
+        "start_m": [3.65, 9.55], "end_m": [3.65, 17.01],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-gerente-operaciones", "kind": "door", "from_m": 0, "to_m": 0.8, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-gerente-comercial", "kind": "door", "from_m": 2.6, "to_m": 3.4, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-gerente-excelencia", "kind": "door", "from_m": 5.65, "to_m": 6.45, "source": "scale-traced approximate/non-constructive from PDF raster"}
         ],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
       {
         "id": "north-room-south-wall",
-        "start_m": [4.8, 18.45], "end_m": [16.1, 18.45],
+        "start_m": [6.3, 18.45], "end_m": [16.1, 18.45],
         "thickness_m": 0.12, "height_m": 2.4,
         "openings": [
-          {"name": "door-director-west", "kind": "door", "from_m": 1.5, "to_m": 2.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
-          {"name": "door-director-center", "kind": "door", "from_m": 5.0, "to_m": 5.8, "source": "scale-traced approximate/non-constructive from PDF raster"},
-          {"name": "door-recursos-humanos", "kind": "door", "from_m": 8.9, "to_m": 9.7, "source": "scale-traced approximate/non-constructive from PDF raster"}
+          {"name": "door-director-west", "kind": "door", "from_m": 0, "to_m": 0.8, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-director-center", "kind": "door", "from_m": 3.5, "to_m": 4.3, "source": "scale-traced approximate/non-constructive from PDF raster"},
+          {"name": "door-recursos-humanos", "kind": "door", "from_m": 7.4, "to_m": 8.2, "source": "scale-traced approximate/non-constructive from PDF raster"}
         ],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
@@ -382,35 +450,35 @@
       {
         "id": "central-office-south",
         "start_m": [11.45, 13.35], "end_m": [12.55, 13.35],
-        "thickness_m": 0.12, "height_m": 1.6, "openings": [],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
         "source": "scale-traced approximate/non-constructive from PDF raster; visually distinct solid short right segment with h=1.60 annotation; not suitable for construction"
       },
       {
         "id": "central-office-meeting-divider",
         "start_m": [12.55, 13.35], "end_m": [12.55, 17.05],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
+        "source": "scale-traced approximate/non-constructive from PDF raster; user-classified thick black space divider as a translucent acrylic partition"
       },
       {
         "id": "meeting-room-south",
-        "start_m": [12.55, 13.35], "end_m": [17.8, 13.35],
+        "start_m": [12.55, 13.35], "end_m": [18.0, 13.35],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
+        "source": "scale-traced approximate/non-constructive from PDF raster; user-classified thick black space divider as a translucent acrylic partition; u≈18.0 m is approximate, not a dimensioned survey value"
       },
       {
         "id": "meeting-room-east",
-        "start_m": [17.8, 13.35], "end_m": [17.8, 17.05],
+        "start_m": [18.0, 13.35], "end_m": [18.0, 17.05],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
+        "source": "scale-traced approximate/non-constructive from PDF raster; user-classified thick black space divider as a translucent acrylic partition; u≈18.0 m is approximate, not a dimensioned survey value"
       },
       {
         "id": "meeting-room-north-extension",
-        "start_m": [16.1, 17.05], "end_m": [17.8, 17.05],
+        "start_m": [16.1, 17.05], "end_m": [18.0, 17.05],
         "thickness_m": 0.12, "height_m": 2.4,
         "openings": [
           {"name": "door-zona-reuniones-north-pasadizo", "kind": "door", "from_m": 0.7, "to_m": 1.699, "source": "scale-traced approximate/non-constructive from PDF raster"}
         ],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
+        "source": "scale-traced approximate/non-constructive from PDF raster; user-classified thick black space divider as a translucent acrylic partition; u≈18.0 m is approximate, not a dimensioned survey value"
       },
       {
         "id": "marketing-internacional-south",
@@ -441,9 +509,11 @@
       },
       {
         "id": "archivo-general-west",
-        "start_m": [19.8, 20.55], "end_m": [19.8, 22.1],
+        "start_m": [19.8, 21.0], "end_m": [19.8, 22.1],
         "thickness_m": 0.12, "height_m": 2.4,
-        "openings": [{"name": "door-archivo-general-west", "kind": "door", "from_m": 0.45, "to_m": 1.25, "source": "scale-traced approximate/non-constructive from PDF raster; visible west-wall door"}],
+        "openings": [
+          {"name": "door-archivo-general-west", "kind": "door", "from_m": 0, "to_m": 0.8, "source": "scale-traced approximate/non-constructive from PDF raster; visible west-wall door"}
+        ],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
       {
@@ -496,18 +566,14 @@
         "id": "stair-enclosure-west",
         "start_m": [19.85, 12.45], "end_m": [19.85, 15.65],
         "thickness_m": 0.12, "height_m": 2.4,
-        "openings": [{"name": "door-stair-enclosure-west", "kind": "door", "from_m": 2.3, "to_m": 3.1, "source": "scale-traced approximate/non-constructive from PDF raster; visible stair entrance"}],
+        "openings": [
+          {"name": "door-stair-enclosure-west", "kind": "door", "from_m": 2.3, "to_m": 3.1, "source": "scale-traced approximate/non-constructive from PDF raster; visible stair entrance"}
+        ],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
       {
         "id": "stair-enclosure-west-landing-step",
         "start_m": [19.85, 15.65], "end_m": [19.42, 15.65],
-        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
-      },
-      {
-        "id": "stair-enclosure-west-landing",
-        "start_m": [19.42, 15.65], "end_m": [19.42, 17.0],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
@@ -526,12 +592,6 @@
       {
         "id": "stair-enclosure-north",
         "start_m": [19.42, 17.0], "end_m": [22.56, 17.0],
-        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
-        "source": "scale-traced approximate/non-constructive from PDF raster"
-      },
-      {
-        "id": "ducto-de-montantes-west",
-        "start_m": [19.42, 11.14], "end_m": [19.42, 12.3],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
         "source": "scale-traced approximate/non-constructive from PDF raster"
       },
@@ -582,6 +642,130 @@
         "start_m": [21.56, 12.35], "end_m": [22.62, 12.35],
         "thickness_m": 0.12, "height_m": 2.4, "openings": [],
         "source": "scale-traced approximate/non-constructive from PDF raster"
+      },
+      {
+        "id": "tesoreria-contabilidad-north",
+        "start_m": [4.8, 2.8], "end_m": [7.15, 2.8],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "tesoreria-contabilidad-divider",
+        "start_m": [7.15, 2.8], "end_m": [7.15, 0.08],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "contabilidad-low-drywall",
+        "start_m": [5.42, 5.87], "end_m": [9.75, 5.87],
+        "thickness_m": 0.12, "height_m": 0.34, "annotatedHeight_m": 0.34, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; height from adjacent 'Muro bajo de Drywall h=0.34' annotation; user confirmed 2026-10-16"
+      },
+      {
+        "id": "gerencia-administracion-south",
+        "start_m": [0.08, 2.8], "end_m": [3.65, 2.8],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "gerencia-administracion-east",
+        "start_m": [3.65, 2.8], "end_m": [3.65, 5.65],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-gerencia-administracion", "kind": "door", "from_m": 0.12, "to_m": 1.02, "source": "scale-traced approximate/non-constructive from PDF door swing"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "jefe-tesoreria-east",
+        "start_m": [2.55, 0.08], "end_m": [2.55, 2.8],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-jefe-tesoreria", "kind": "door", "from_m": 1.7, "to_m": 2.66, "source": "scale-traced approximate/non-constructive from PDF door swing"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; P06a sliding door"
+      },
+      {
+        "id": "contabilidad-jefe-ti-divider",
+        "start_m": [10.6, 0.08], "end_m": [10.6, 5.34],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "south-ti-north-wall",
+        "start_m": [10.6, 2.7], "end_m": [18.36, 2.7],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-jefe-ti", "kind": "door", "from_m": 0.06, "to_m": 0.98, "source": "scale-traced approximate/non-constructive from PDF door swing"},
+          {"name": "door-oficina-ti", "kind": "door", "from_m": 6.73, "to_m": 7.76, "source": "scale-traced approximate/non-constructive from PDF door swing"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "jefe-ti-oficina-ti-divider",
+        "start_m": [13, 0.08], "end_m": [13, 2.7],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-jefe-ti-oficina-ti", "kind": "door", "from_m": 0.95, "to_m": 1.81, "source": "scale-traced approximate/non-constructive from PDF door swing"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; P06 door"
+      },
+      {
+        "id": "gerente-tecnico-east-west",
+        "start_m": [18.36, 2.1], "end_m": [18.36, 4.8],
+        "thickness_m": 0.12, "height_m": 2.4,
+        "openings": [
+          {"name": "door-gerente-tecnico-east", "kind": "door", "from_m": 1.65, "to_m": 2.7, "source": "scale-traced approximate/non-constructive from PDF door swing"}
+        ],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "gerente-tecnico-east-south",
+        "start_m": [18.36, 2.1], "end_m": [21.43, 2.1],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
+      },
+      {
+        "id": "negocios-internacionales-south",
+        "start_m": [18.36, 4.8], "end_m": [21.43, 4.8],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "negocios-internacionales-west",
+        "start_m": [18.36, 4.8], "end_m": [18.36, 5.89],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "sales-chief-south",
+        "start_m": [18.36, 6.85], "end_m": [21.43, 6.85],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "sales-chief-west",
+        "start_m": [18.36, 6.85], "end_m": [18.36, 7.98],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "gestion-calidad-south",
+        "start_m": [18.36, 8.94], "end_m": [21.43, 8.94],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "gestion-calidad-west",
+        "start_m": [18.36, 8.94], "end_m": [18.36, 10.05],
+        "thickness_m": 0.12, "height_m": 1.6, "annotatedHeight_m": 1.6, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid; user-marked purple run in t3d-review-crops; annotated h=1.60"
+      },
+      {
+        "id": "gestion-calidad-north",
+        "start_m": [18.36, 10.96], "end_m": [19.42, 10.96],
+        "thickness_m": 0.12, "height_m": 2.4, "openings": [],
+        "source": "scale-traced approximate/non-constructive from PDF vector double-line centerlines mapped through the local grid"
       }
     ],
     "circulation": [
@@ -618,15 +802,26 @@
       {
         "id": "east-pasadizo-connector",
         "name": "East-side passage through waiting hall to stair approach and row-4 seam",
-        "polygon_m": [[17.8, 11.1], [19.36, 11.1], [19.36, 22.1], [17.8, 22.1]],
-        "source": "scale-traced approximate/non-constructive from PDF raster; clear west of lift and stair enclosures"
+        "polygon_m": [[18.0, 11.1], [19.36, 11.1], [19.36, 22.1], [18.0, 22.1]],
+        "source": "scale-traced approximate/non-constructive from PDF raster; clear west of lift and stair enclosures; west boundary abuts the meeting-room east trace at u≈18.0 m without gap or overlap"
       },
       {
         "id": "stair-core-approach",
         "name": "Narrow stair-frontage approach connection",
         "polygon_m": [[19.36, 14.75], [19.79, 14.75], [19.79, 15.55], [19.36, 15.55]],
-
         "source": "scale-traced approximate/non-constructive from PDF raster; meets the stair west-wall face at the visible entrance"
+      },
+      {
+        "id": "south-west-access",
+        "name": "South continuation of the west office access",
+        "polygon_m": [[3.65, 2.8], [4.8, 2.8], [4.8, 5.65], [3.65, 5.65]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework; open corridor to Tesorería and Gerencia de Administración door"
+      },
+      {
+        "id": "south-pasadizo",
+        "name": "South-east PASADIZO",
+        "polygon_m": [[16.1, 2.7], [18.3, 2.7], [18.3, 9.05], [16.1, 9.05]],
+        "source": "scale-traced approximate/non-constructive from PDF vector linework; joins the pool step at v=9.05 and serves Oficina de TI, Gerente Técnico, and the open-sided east offices"
       }
     ],
     "zones": [
