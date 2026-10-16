@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#172225" />
+    <title>Office walkthrough</title>
+  </head>
+  <body>
+    <main id="app" aria-label="Virtual office walkthrough">
+      <section class="panel" aria-label="Walkthrough controls">
+        <div class="heading">
+          <h1>Office walkthrough</h1>
+          <span id="asset-status" role="status">Loading office model…</span>
+        </div>
+        <p id="asset-detail">Preparing the Three.js scene.</p>
+        <div class="buttons">
+          <button id="reset" type="button">Reset position</button>
+          <button id="overview" type="button">Overview</button>
+        </div>
+      </section>
+      <p class="instructions">Click the floor to look around · WASD to move · Esc to release the mouse</p>
+      <div class="crosshair" aria-hidden="true"></div>
+      <div id="fatal" role="alert" hidden></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

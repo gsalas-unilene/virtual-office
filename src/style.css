@@ -1,0 +1,159 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color: #f5f7f3;
+  background: #d8e0df;
+  font: 14px/1.45 system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+#app,
+#app canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#app canvas {
+  display: block;
+  outline: none;
+  touch-action: none;
+}
+
+.panel {
+  position: fixed;
+  z-index: 1;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  width: min(390px, calc(100vw - 32px));
+  padding: 16px;
+  color: #f5f7f3;
+  background: rgb(23 34 37 / 92%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgb(12 20 21 / 20%);
+  backdrop-filter: blur(8px);
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+#asset-status {
+  color: #b7e4cb;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+#asset-status.error {
+  color: #ffb9a9;
+}
+
+#asset-detail {
+  margin: 8px 0 14px;
+  color: #d1dbd8;
+  font-size: 12px;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  min-height: 36px;
+  padding: 7px 11px;
+  color: #172225;
+  background: #d8e5dd;
+  border: 0;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f4faf5;
+}
+
+button:focus-visible {
+  outline: 3px solid #82cfad;
+  outline-offset: 2px;
+}
+
+.instructions {
+  position: fixed;
+  z-index: 1;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 50%;
+  margin: 0;
+  padding: 9px 13px;
+  color: #f5f7f3;
+  background: rgb(23 34 37 / 88%);
+  border-radius: 8px;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.crosshair {
+  position: fixed;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgb(255 255 255 / 85%);
+  border-radius: 50%;
+  box-shadow: 0 0 2px #172225;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+#fatal:not([hidden]) {
+  position: fixed;
+  z-index: 2;
+  right: 16px;
+  bottom: 68px;
+  left: 16px;
+  max-width: 520px;
+  margin: auto;
+  padding: 12px 16px;
+  color: #351a15;
+  background: #ffdbd2;
+  border-radius: 8px;
+}
+
+@media (max-width: 520px) {
+  .instructions {
+    right: 12px;
+    left: 12px;
+    white-space: normal;
+    transform: none;
+  }
+}

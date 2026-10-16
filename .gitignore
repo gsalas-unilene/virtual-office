@@ -1,0 +1,13 @@
+# Local Pi runtime state
+.atl/
+.codegraph/
+
+# Generated dependencies and build output
+node_modules/
+dist/
+.cache/
+scripts/__pycache__/
+
+# Local T3R PDF review crops
+/t3r-review-crops/
+/t3d-review-crops/
