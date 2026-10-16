@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#172225" />
+    <title>Floor 4 walkthrough</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #172225; color: #e8ece9; font: 14px system-ui, sans-serif; }
+      .panel { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(23, 34, 37, 0.85); border-radius: 6px; }
+      button { font: inherit; color: inherit; background: #2f4a4f; border: 1px solid #5d7d82; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+      .crosshair { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 50%; pointer-events: none; }
+      .crosshair[hidden] { display: none; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <button id="mode" type="button">Overview</button>
+      <span id="status" role="status">Loading floor 4 model…</span>
+    </div>
+    <div class="crosshair" aria-hidden="true"></div>
+    <script type="module" src="/src/floor4-viewer.js"></script>
+  </body>
+</html>
