@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import walls from './floor4-walls.json';
+import furniture from './floor4-furniture.json';
 import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
 
 const status = document.querySelector('#status');
@@ -36,7 +37,7 @@ orbit.enableDamping = true;
 const walkCamera = new THREE.PerspectiveCamera(70, 1, 0.05, 100);
 walkCamera.rotation.order = 'YXZ';
 
-const obstacles = buildObstacles(walls);
+const obstacles = buildObstacles(walls, furniture);
 const EYE = 1.62;
 const RADIUS = 0.25;
 const SPEED = 2.2;

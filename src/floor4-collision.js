@@ -1,8 +1,8 @@
 // 2D walkthrough collisions for the floor 4 model, in plan metres (u along A→F, v along row 2→7).
 // Three.js maps a plan point (u, v) to (x = u, z = -v).
 
-// Open pool floor between the column rows, looking along the pool towards grid F (yaw -90°).
-export const SPAWN = { u: 8.0, v: 8.4, yaw: -Math.PI / 2 };
+// Pool aisle between the desk rows, looking along it towards grid F (yaw -90°).
+export const SPAWN = { u: 9.5, v: 9.6, yaw: -Math.PI / 2 };
 
 function bounded(polygon) {
   const us = polygon.map((p) => p[0]);
@@ -17,10 +17,12 @@ function segmentRect([u0, v0], [u1, v1], thickness) {
   return [[u0 + nu, v0 + nv], [u1 + nu, v1 + nv], [u1 - nu, v1 - nv], [u0 - nu, v0 - nv]];
 }
 
-/** Every walking obstacle: concrete/drywall solids, facade windows, aluminium posts and mamparas. */
-export function buildObstacles(walls) {
+/** Every walking obstacle: concrete/drywall solids, facade windows, aluminium posts, mamparas, and furniture other than chairs. */
+export function buildObstacles(walls, furniture = { items: [] }) {
   const polygons = [...walls.solids, ...walls.windows, ...walls.posts].map((item) => item.polygon_m);
   for (const p of walls.partitions) polygons.push(segmentRect(p.start_m, p.end_m, p.thickness_m));
+  // Chairs are left out so the walker can pass between workstations as if pushing them aside.
+  for (const item of furniture.items) if (item.kind !== "chair") polygons.push(item.footprint_m);
   return polygons.map(bounded);
 }
 

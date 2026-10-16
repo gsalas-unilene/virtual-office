@@ -29,8 +29,13 @@ PALETTE = {
     "table": (0.62, 0.48, 0.29, 1.0),
     "concrete": (0.72, 0.72, 0.70, 1.0),
     "glass": (0.62, 0.80, 0.90, 0.35),
-    "frosted": (0.90, 0.93, 0.94, 0.7),
+    "frosted": (0.90, 0.93, 0.94, 0.88),
     "aluminum": (0.06, 0.06, 0.07, 1.0),
+    # Furniture (user): black chairs, light mustard melamine, wood-colour melamine oval meeting table.
+    "upholstery": (0.03, 0.03, 0.035, 1.0),
+    "melamine": (0.87, 0.74, 0.45, 1.0),
+    "wood": (0.55, 0.36, 0.2, 1.0),
+    "fixture": (0.95, 0.95, 0.94, 1.0),
 }
 
 
@@ -322,7 +327,35 @@ def _vector_wall_prisms(walls):
     return prisms
 
 
-def _prepare_checkpoint_plan(plan, walls=None):
+# One generic office chair, replicated at every chair the plan draws. Local metres: x across, +y towards the desk, z up.
+CHAIR_PARTS = [
+    ((-0.30, -0.03, 0.03), (0.30, 0.03, 0.07)),    # five-star base, simplified as a cross
+    ((-0.03, -0.30, 0.03), (0.03, 0.30, 0.07)),
+    ((-0.03, -0.03, 0.07), (0.03, 0.03, 0.42)),    # gas column
+    ((-0.24, -0.22, 0.42), (0.24, 0.24, 0.49)),    # seat
+    ((-0.02, -0.25, 0.45), (0.02, -0.21, 0.60)),   # backrest support
+    ((-0.22, -0.27, 0.58), (0.22, -0.21, 0.95)),   # backrest
+    ((-0.26, -0.15, 0.49), (-0.23, -0.12, 0.64)),  # armrest posts
+    ((0.23, -0.15, 0.49), (0.26, -0.12, 0.64)),
+    ((-0.27, -0.18, 0.64), (-0.22, 0.12, 0.67)),   # armrests
+    ((0.22, -0.18, 0.64), (0.27, 0.12, 0.67)),
+]
+
+
+def _furniture(furniture):
+    """Furniture prisms (decor, non-collidable) and generic chair placements."""
+    prisms, chairs = [], []
+    for item in furniture.get("items", []):
+        if item["kind"] == "chair":
+            chairs.append({"name": item["id"], "position": item["position_m"], "angle": item["facing_rad"]})
+            continue
+        for index, part in enumerate(item["parts"]):
+            prisms.append({"name": f"{item['id']}_{index + 1:02d}", "polygon": part["polygon_m"], "z": part["z"],
+                           "material": part["material"], "collidable": False})
+    return prisms, chairs
+
+
+def _prepare_checkpoint_plan(plan, walls=None, furniture=None):
     if not isinstance(plan, dict):
         _validate_plan(plan)
     if plan.get("stage") == "west-north-interior":
@@ -335,6 +368,9 @@ def _prepare_checkpoint_plan(plan, walls=None):
             plan["prisms"] = _vector_wall_prisms(walls)
             plan["boxes"] = _vector_partition_boxes(walls)
             plan["floorOutline"] = walls.get("floor_m", plan["floorOutline"])
+            if furniture is not None:
+                furniture_prisms, plan["chairs"] = _furniture(furniture)
+                plan["prisms"] += furniture_prisms
     _validate_plan(plan)
 
 
@@ -949,9 +985,35 @@ def _publish_checkpoint_file(source, target, source_dir_fd=None, target_dir_fd=N
             os.close(publish_dir)
 
 
+def _make_chair_instances(plan, collection, materials, prefix, north_sign=-1):
+    """Build the generic chair mesh once and link one object per placement (shared mesh data, instanced in the GLB)."""
+    if not plan.get("chairs"):
+        return []
+    bm = bmesh.new()
+    for (x0, y0, z0), (x1, y1, z1) in CHAIR_PARTS:
+        verts = bmesh.ops.create_cube(bm, size=1.0)["verts"]
+        bmesh.ops.scale(bm, vec=Vector((x1 - x0, y1 - y0, z1 - z0)), verts=verts)
+        bmesh.ops.translate(bm, vec=Vector(((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)), verts=verts)
+    mesh = bpy.data.meshes.new(f"{prefix}_ChairMesh")
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.materials.append(materials["upholstery"])
+    objects = []
+    for chair in plan["chairs"]:
+        obj = bpy.data.objects.new(f"{prefix}_{chair['name']}", mesh)
+        east, north = chair["position"]
+        obj.location = (east, north_sign * north, 0.0)
+        # Local +y is the chair front; turn it to the plan facing angle (mirrored when north is reflected).
+        obj.rotation_euler = (0.0, 0.0, north_sign * chair["angle"] - math.pi / 2)
+        obj["collidable"] = False
+        collection.objects.link(obj)
+        objects.append((obj, f"{COLLECTION_NAME}_{chair['name']}"))
+    return objects
+
+
 def _checkpoint_object_names(plan, prefix):
     groups = {(item["material"], item["collidable"]) for item in plan["boxes"] + plan.get("prisms", [])}
-    return {f"{prefix}_Floor"} | {
+    return {f"{prefix}_Floor"} | {f"{prefix}_{chair['name']}" for chair in plan.get("chairs", [])} | {
         f"{prefix}_{material}_{'Blocking' if collidable else 'Decor'}"
         for material, collidable in groups
     }
@@ -989,7 +1051,7 @@ def _close_checkpoint_directory(directory_fd):
         os.close(directory_fd)
 
 
-def _main_checkpoint(plan_path, checkpoint_name, walls_path=None):
+def _main_checkpoint(plan_path, checkpoint_name, walls_path=None, furniture_path=None):
     if bpy.context.mode != "OBJECT":
         return _result("blocked", "Blender must be in Object Mode; no scene changes made.")
     if not hasattr(bpy.ops.export_scene, "gltf"):
@@ -1020,7 +1082,13 @@ def _main_checkpoint(plan_path, checkpoint_name, walls_path=None):
             walls_source = (walls_source if walls_source.is_absolute() else root / walls_source).resolve()
             with walls_source.open(encoding="utf-8") as source:
                 walls = json.load(source)
-        _prepare_checkpoint_plan(plan, walls)
+        furniture = None
+        if furniture_path is not None:
+            furniture_source = Path(furniture_path)
+            furniture_source = (furniture_source if furniture_source.is_absolute() else root / furniture_source).resolve()
+            with furniture_source.open(encoding="utf-8") as source:
+                furniture = json.load(source)
+        _prepare_checkpoint_plan(plan, walls, furniture)
         prefix = f"Floor4_{checkpoint_name}"
         if bpy.data.collections.get(prefix):
             raise ValueError(f"Collection {prefix!r} already exists; no scene changes made.")
@@ -1053,10 +1121,12 @@ def _main_checkpoint(plan_path, checkpoint_name, walls_path=None):
         bpy.context.scene.collection.children.link(created_collection)
         materials = {
             name: _material(name, prefix)
-            for name in sorted({item["material"] for item in plan["boxes"] + plan.get("prisms", [])})
+            for name in sorted({item["material"] for item in plan["boxes"] + plan.get("prisms", [])}
+                               | ({"upholstery"} if plan.get("chairs") else set()))
         }
         objects.append(_make_floor(plan, created_collection, _material("floor", prefix), prefix, north_sign=1))
         objects.extend(_make_box_batches(plan, created_collection, materials, prefix, north_sign=1))
+        objects.extend(_make_chair_instances(plan, created_collection, materials, prefix, north_sign=1))
         try:
             byte_count = _export_objects(objects, temp_asset)
         finally:
@@ -1117,7 +1187,7 @@ def _main_checkpoint(plan_path, checkpoint_name, walls_path=None):
     )
 
 
-def main(replace=False, plan_path=None, checkpoint_name=None, walls_path=None):
+def main(replace=False, plan_path=None, checkpoint_name=None, walls_path=None, furniture_path=None):
     """Create OfficeDemo, or create a non-overwriting explicit-plan checkpoint."""
     if not isinstance(replace, bool):
         return _result("blocked", "replace must be the explicit boolean True or False.")
@@ -1126,7 +1196,7 @@ def main(replace=False, plan_path=None, checkpoint_name=None, walls_path=None):
             return _result("blocked", "replace is not available in checkpoint mode.")
         if plan_path is None or checkpoint_name is None:
             return _result("blocked", "checkpoint mode requires both plan_path and checkpoint_name.")
-        return _main_checkpoint(plan_path, checkpoint_name, walls_path)
+        return _main_checkpoint(plan_path, checkpoint_name, walls_path, furniture_path)
     if bpy.context.mode != "OBJECT":
         return _result("blocked", "Blender must be in Object Mode; no scene changes made.")
     if not hasattr(bpy.ops.export_scene, "gltf"):

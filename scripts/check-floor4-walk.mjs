@@ -5,7 +5,8 @@ import { buildObstacles, isBlocked, SPAWN } from "../src/floor4-collision.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const walls = JSON.parse(readFileSync(resolve(root, "src/floor4-walls.json"), "utf8"));
-const obstacles = buildObstacles(walls);
+const furniture = JSON.parse(readFileSync(resolve(root, "src/floor4-furniture.json"), "utf8"));
+const obstacles = buildObstacles(walls, furniture);
 const radius = 0.25;
 const errors = [];
 const check = (condition, message) => {
@@ -21,8 +22,14 @@ check(isBlocked(obstacles, walls.floor_m, 15.0, 2.73, radius), "the Oficina de T
 check(isBlocked(obstacles, walls.floor_m, 7.5, 5.87, radius), "the Contabilidad mampara must block");
 check(isBlocked(obstacles, walls.floor_m, -0.47, 8.5, radius), "facade windows must block");
 check(!isBlocked(obstacles, walls.floor_m, 13.0, 1.45, radius), "the open Jefe de TI sliding doorway (P06) must be passable");
+const meeting = furniture.items.find((i) => i.kind === "meeting-table");
+check(meeting && isBlocked(obstacles, walls.floor_m, ...centre(meeting.footprint_m), radius), "tables and desks must block walking");
+const chair = furniture.items.find((i) => i.kind === "chair");
+check(buildObstacles(walls, furniture).length === buildObstacles(walls).length + furniture.items.filter((i) => i.kind !== "chair").length,
+  "every non-chair furniture footprint is an obstacle; chairs are not (they can be pushed aside)");
+check(chair && Number.isFinite(chair.facing_rad), "chairs are placements without collision footprints");
 
-// Breadth-first reachability on a 0.1 m grid from the spawn.
+// Breadth-first reachability on a 0.1 m grid from the spawn; room probes sit on free floor beside the furniture.
 const step = 0.1;
 const key = (i, j) => `${i},${j}`;
 const seen = new Set([key(0, 0)]);
@@ -42,9 +49,9 @@ const reachable = (u, v) => [...seen].some((k) => {
   return Math.hypot(SPAWN.u + i * step - u, SPAWN.v + j * step - v) <= 0.15;
 });
 const rooms = {
-  "Gerente Tecnico (east)": [19.8, 3.4], "Jefe de TI": [11.8, 1.4], "Oficina de TI": [15.5, 1.2], "Jefe de Tesoreria": [1.3, 1.4],
-  "Gerencia de Administracion": [1.8, 4.2], "Gerente de Marketing": [6.2, 15.6], "Director Ejecutivo": [6.5, 20.5],
-  "Zona de Reuniones": [15.0, 15.0], "Archivo General": [21.2, 21.3], "Jefe de Ventas": [19.8, 7.9],
+  "Gerente Tecnico (east)": [18.8, 2.9], "Jefe de TI": [11.0, 1.1], "Oficina de TI": [15.5, 1.2], "Jefe de Tesoreria": [1.4, 1.8],
+  "Gerencia de Administracion": [2.8, 4.6], "Gerente de Marketing": [6.6, 15.0], "Director Ejecutivo": [6.5, 20.5],
+  "Zona de Reuniones": [16.9, 14.8], "Archivo General": [20.6, 21.4], "Jefe de Ventas": [20.6, 7.2],
 };
 for (const [name, [u, v]] of Object.entries(rooms)) check(reachable(u, v), `${name} must be reachable on foot from the pool`);
 
