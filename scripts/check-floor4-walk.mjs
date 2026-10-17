@@ -50,7 +50,7 @@ const reachable = (u, v) => [...seen].some((k) => {
 });
 const rooms = {
   "Gerente Tecnico (east)": [18.8, 2.9], "Jefe de TI": [11.0, 1.1], "Oficina de TI": [15.5, 1.2], "Jefe de Tesoreria": [1.4, 1.8],
-  "Gerencia de Administracion": [2.8, 4.6], "Gerente de Marketing": [6.6, 15.0], "Director Ejecutivo": [6.5, 20.5],
+  "Gerencia de Administracion": [2.8, 4.6], "Gerente de Marketing": [6.6, 15.0], "Director Ejecutivo": [5.5, 20.6],
   "Zona de Reuniones": [16.9, 14.8], "Archivo General": [20.6, 21.4], "Jefe de Ventas": [20.6, 7.2],
 };
 for (const [name, [u, v]] of Object.entries(rooms)) check(reachable(u, v), `${name} must be reachable on foot from the pool`);

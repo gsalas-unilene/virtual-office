@@ -36,6 +36,7 @@ PALETTE = {
     "melamine": (0.87, 0.74, 0.45, 1.0),
     "wood": (0.55, 0.36, 0.2, 1.0),
     "fixture": (0.95, 0.95, 0.94, 1.0),
+    "handle": (0.55, 0.56, 0.58, 1.0),
 }
 
 
@@ -327,21 +328,6 @@ def _vector_wall_prisms(walls):
     return prisms
 
 
-# One generic office chair, replicated at every chair the plan draws. Local metres: x across, +y towards the desk, z up.
-CHAIR_PARTS = [
-    ((-0.30, -0.03, 0.03), (0.30, 0.03, 0.07)),    # five-star base, simplified as a cross
-    ((-0.03, -0.30, 0.03), (0.03, 0.30, 0.07)),
-    ((-0.03, -0.03, 0.07), (0.03, 0.03, 0.42)),    # gas column
-    ((-0.24, -0.22, 0.42), (0.24, 0.24, 0.49)),    # seat
-    ((-0.02, -0.25, 0.45), (0.02, -0.21, 0.60)),   # backrest support
-    ((-0.22, -0.27, 0.58), (0.22, -0.21, 0.95)),   # backrest
-    ((-0.26, -0.15, 0.49), (-0.23, -0.12, 0.64)),  # armrest posts
-    ((0.23, -0.15, 0.49), (0.26, -0.12, 0.64)),
-    ((-0.27, -0.18, 0.64), (-0.22, 0.12, 0.67)),   # armrests
-    ((0.22, -0.18, 0.64), (0.27, 0.12, 0.67)),
-]
-
-
 def _furniture(furniture):
     """Furniture prisms (decor, non-collidable) and generic chair placements."""
     prisms, chairs = [], []
@@ -370,6 +356,7 @@ def _prepare_checkpoint_plan(plan, walls=None, furniture=None):
             plan["floorOutline"] = walls.get("floor_m", plan["floorOutline"])
             if furniture is not None:
                 furniture_prisms, plan["chairs"] = _furniture(furniture)
+                plan["chairModel"] = furniture["chairModel"]
                 plan["prisms"] += furniture_prisms
     _validate_plan(plan)
 
@@ -990,7 +977,7 @@ def _make_chair_instances(plan, collection, materials, prefix, north_sign=-1):
     if not plan.get("chairs"):
         return []
     bm = bmesh.new()
-    for (x0, y0, z0), (x1, y1, z1) in CHAIR_PARTS:
+    for (x0, y0, z0), (x1, y1, z1) in plan["chairModel"]:
         verts = bmesh.ops.create_cube(bm, size=1.0)["verts"]
         bmesh.ops.scale(bm, vec=Vector((x1 - x0, y1 - y0, z1 - z0)), verts=verts)
         bmesh.ops.translate(bm, vec=Vector(((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2)), verts=verts)
