@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import walls from './floor4-walls.json';
 import furniture from './floor4-furniture.json';
 import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
@@ -10,15 +11,61 @@ const modeButton = document.querySelector('#mode');
 const crosshair = document.querySelector('.crosshair');
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+// Neutral (colour-preserving) tone mapping and soft shadows; image-based lighting from a neutral room gives glass and boards real reflections.
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 0.95;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.append(renderer.domElement);
 const canvas = renderer.domElement;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x172225);
-scene.add(new THREE.HemisphereLight(0xffffff, 0x445055, 1.6));
-const sun = new THREE.DirectionalLight(0xffffff, 1.4);
-sun.position.set(-10, 25, 15);
-scene.add(sun);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.3;
+scene.add(new THREE.HemisphereLight(0xfffaf0, 0x5a5f60, 0.55));
+// Near-vertical key light standing in for the ceiling fixtures: furniture casts its shadow on the floor below it.
+const sun = new THREE.DirectionalLight(0xfff6e8, 2.2);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.02;
+sun.shadow.radius = 3;
+Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 60 });
+scene.add(sun, sun.target);
+
+// Surface finishes by material name (the Blender builder names materials <checkpoint>_<finish>).
+const FINISHES = {
+  floor: { roughness: 0.32, color: 0xd9d6cf },  // porcelain tile
+  melamine: { roughness: 0.55 },
+  wood: { roughness: 0.48 },
+  upholstery: { roughness: 0.9 },
+  handle: { roughness: 0.3, metalness: 0.9 },
+  aluminum: { roughness: 0.4, metalness: 0.6 },
+  glass: { roughness: 0.04, envMapIntensity: 1.4 },
+  frosted: { roughness: 0.75 },
+  wall: { roughness: 0.9 },
+  concrete: { roughness: 0.92 },
+  partition: { roughness: 0.85 },
+  fixture: { roughness: 0.15 },
+};
+
+function finish(root) {
+  root.traverse((object) => {
+    if (!object.isMesh) return;
+    const material = object.material;
+    const key = Object.keys(FINISHES).find((name) => material.name.endsWith(`_${name}`));
+    if (key) {
+      const { color, ...props } = FINISHES[key];
+      Object.assign(material, props);
+      if (color !== undefined) material.color.setHex(color);
+    }
+    // Glass lets light through, so it neither casts shadows nor darkens the offices behind it.
+    object.castShadow = !material.transparent && key !== 'floor';
+    object.receiveShadow = true;
+  });
+}
 
 // Ceiling at the clear height over the vector floor outline; shown only while walking so the overview stays open.
 const ceilingShape = new THREE.Shape(walls.floor_m.map(([u, v]) => new THREE.Vector2(u, -v)));
@@ -38,6 +85,25 @@ const walkCamera = new THREE.PerspectiveCamera(70, 1, 0.05, 100);
 walkCamera.rotation.order = 'YXZ';
 
 const obstacles = buildObstacles(walls, furniture);
+
+// 0.60 m LED panels on a 2.4 m grid over free floor, shown with the ceiling.
+const panelSpots = [];
+for (let u = 1.2; u < 23; u += 2.4) {
+  for (let v = 1.2; v < 23; v += 2.4) if (!isBlocked(obstacles, walls.floor_m, u, v, 0.35)) panelSpots.push([u, v]);
+}
+const panels = new THREE.InstancedMesh(
+  new THREE.PlaneGeometry(0.6, 0.6),
+  new THREE.MeshBasicMaterial({ color: 0xfffdf6 }),
+  panelSpots.length,
+);
+const placement = new THREE.Object3D();
+panelSpots.forEach(([u, v], index) => {
+  placement.position.set(u, walls.heights_m.clear - 0.005, -v);
+  placement.rotation.set(Math.PI / 2, 0, 0);
+  placement.updateMatrix();
+  panels.setMatrixAt(index, placement.matrix);
+});
+scene.add(panels);
 const EYE = 1.62;
 const RADIUS = 0.25;
 const SPEED = 2.2;
@@ -58,6 +124,7 @@ function setMode(next) {
   keys.clear();
   if (mode === 'overview' && document.pointerLockElement === canvas) document.exitPointerLock();
   ceiling.visible = mode === 'walk';
+  panels.visible = mode === 'walk';
   crosshair.hidden = mode !== 'walk';
   orbit.enabled = mode === 'overview';
   modeButton.textContent = mode === 'walk' ? 'Overview' : 'Walk';
@@ -106,9 +173,12 @@ setMode(mode);
 new GLTFLoader().load(
   '/models/floor4.glb',
   (gltf) => {
+    finish(gltf.scene);
     scene.add(gltf.scene);
     const bounds = new THREE.Box3().setFromObject(gltf.scene);
     const center = bounds.getCenter(new THREE.Vector3());
+    sun.target.position.copy(center);
+    sun.position.set(center.x - 4, 30, center.z + 6);
     orbit.target.copy(center);
     // #top matches the PDF sheet orientation (grid A left, row 7 top); building north (F→A) points left.
     // #focus=u,v zooms onto a plan point (metres, grid A/row 2 origin); three.js z is -v.

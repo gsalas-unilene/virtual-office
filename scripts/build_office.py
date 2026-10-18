@@ -28,8 +28,8 @@ PALETTE = {
     "desk": (0.48, 0.34, 0.23, 1.0),
     "table": (0.62, 0.48, 0.29, 1.0),
     "concrete": (0.72, 0.72, 0.70, 1.0),
-    "glass": (0.62, 0.80, 0.90, 0.35),
-    "frosted": (0.90, 0.93, 0.94, 0.88),
+    "glass": (0.62, 0.80, 0.90, 0.45),
+    "frosted": (0.90, 0.93, 0.94, 0.94),
     "aluminum": (0.06, 0.06, 0.07, 1.0),
     # Furniture (user): black chairs, light mustard melamine, wood-colour melamine oval meeting table.
     "upholstery": (0.03, 0.03, 0.035, 1.0),

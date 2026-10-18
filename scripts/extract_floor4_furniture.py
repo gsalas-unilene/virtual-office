@@ -53,6 +53,8 @@ FIXTURE_HEIGHT_M = 0.42
 EXCLUDED = [box(0.0, 19.2, 4.7, 22.3), box(19.4, 12.4, 22.6, 17.05), box(19.85, 17.15, 22.65, 20.45)]
 ARCHIVE = box(19.8, 20.55, 22.65, 22.1)
 RESTROOM = box(0.1, 17.65, 3.7, 18.9)  # S.H. Gerencia interior, north of its south wall
+# User 2026-10-17: the Oficina de TI counter beside the mampara, behind a chair, is a desk and gets a chair.
+USER_DESKS = [Point(13.8, 0.45)]
 # One generic office chair, replicated at every chair the plan draws. Local metres: x across, +y towards the desk, z up.
 CHAIR_PARTS = [
     ((-0.30, -0.03, 0.03), (0.30, 0.03, 0.07)),    # five-star base, simplified as a cross
@@ -501,6 +503,17 @@ def resolve_desks(top_shapes, kinds, chairs_zone):
     return resolved
 
 
+def _seat_in_front(top, built):
+    """A drawn-size chair outline in front of a desk's open long side (the side away from walls)."""
+    edge = _edges(top)[_front_edge(top, built, _long_edges(top), farthest=True)]
+    mid = edge.interpolate(0.5, normalized=True)
+    centre = top.minimum_rotated_rectangle.centroid
+    dx, dy = mid.x - centre.x, mid.y - centre.y
+    length = math.hypot(dx, dy)
+    seat_centre = Point(mid.x + dx / length * 0.3, mid.y + dy / length * 0.3)
+    return seat_centre.buffer(0.22, cap_style=3)
+
+
 def _touching(piece, others, min_shared=0.3, gap=PEDESTAL_GAP_M):
     return [o for o in others if o is not piece and piece.buffer(gap).intersection(o.boundary).length >= min_shared]
 
@@ -559,14 +572,27 @@ def main():
                 kinds[id(t)] = "table"  # chairs all round: a meeting table on panel bases
             elif sides == 0 and _dims(t)[0] <= CREDENZA_MAX_DEPTH_M and t.distance(chairs_zone) > 0.6:
                 kinds[id(t)] = "cabinet"  # nobody sits at it: a credenza
+    for t in top_shapes:
+        if any(t.contains(point) for point in USER_DESKS) and kinds[id(t)] != "desk":
+            kinds[id(t)] = "desk"
+            seat = _seat_in_front(t, built)
+            seats.append(seat)
+            chair_shapes.append(seat)
+            chairs_zone = unary_union(seats)
     desks = [t for t in top_shapes if kinds[id(t)] == "desk"]
     for t in top_shapes:
         if kinds[id(t)] == "cabinet" and _dims(t)[0] <= PEDESTAL_MAX_WIDTH_M and _touching(t, desks):
             kinds[id(t)] = "pedestal"
     has_divider = lambda zone: any(d.intersects(zone) for d in divider_shapes)
-    # The drawers of a pedestal face its own workstation's chair, never the desk it stands against.
-    pedestal_front = lambda p: _front_edge(p, chairs_zone, [i for i, e in enumerate(_edges(p))
-                                                            if not any(d.distance(e.interpolate(0.5, normalized=True)) <= PEDESTAL_GAP_M + 0.02 for d in desks)])
+    # User 2026-10-17: pedestal drawers open towards the aisle, i.e. on the side away from the desk they stand against.
+    def pedestal_front(p):
+        own = unary_union([d for d in desks if d.distance(p) <= PEDESTAL_GAP_M + 0.02] or desks)
+        edges = _edges(p)
+        mid = [e.interpolate(0.5, normalized=True) for e in edges]
+        touching = {i for i in range(4) if own.distance(mid[i]) <= PEDESTAL_GAP_M + 0.02}
+        # The face opposite the one standing against a desk; a piece boxed in by desks opens on its free side.
+        free = [(i + 2) % 4 for i in touching if (i + 2) % 4 not in touching] or [i for i in range(4) if i not in touching] or list(range(4))
+        return max(free, key=lambda i: (round(edges[i].length, 2), round(own.distance(mid[i]), 2), built.distance(mid[i])))
     items = []
     for top in top_shapes:
         kind = kinds[id(top)]
@@ -575,7 +601,11 @@ def main():
         elif kind == "fixture":
             parts = [_prism(top, 0, FIXTURE_HEIGHT_M, "fixture")]
         elif kind == "pedestal":
-            parts = [part for unit in _modules(top) for part in drawer_parts(unit, pedestal_front)]
+            front = pedestal_front(top)
+            front_line = _edges(top)[front]
+            # A drawer column is split into modules only along its open long side; facing a short side it stays one unit.
+            units = _modules(top) if front in _long_edges(top) else [top]
+            parts = [part for unit in units for part in drawer_parts(unit, lambda u: _front_edge(u, front_line))]
         elif kind == "cabinet":
             parts = cabinet_parts(top, built)
         elif kind == "table":

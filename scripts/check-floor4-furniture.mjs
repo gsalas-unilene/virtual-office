@@ -58,6 +58,37 @@ check(items.filter((i) => i.kind === "desk").every((i) => i.parts.filter((p) => 
 const pedestals = items.filter((i) => i.kind === "pedestal");
 check(pedestals.length >= 30 && pedestals.every((i) => { const n = i.parts.filter((p) => p.material === "handle").length; return n >= 3 && n % 3 === 0; }),
   "the squares beside desks are drawer pedestals of three drawers per module (user)");
+// User 2026-10-17: drawers open towards the aisle, away from the desk the pedestal stands against.
+const desksAll = items.filter((i) => i.kind === "desk").map((i) => i.footprint_m);
+const nearestOnRing = ([u, v], ring) => ring.map(([u0, v0], i) => {
+  const [u1, v1] = ring[(i + 1) % ring.length];
+  const du = u1 - u0;
+  const dv = v1 - v0;
+  const t = Math.max(0, Math.min(1, ((u - u0) * du + (v - v0) * dv) / (du * du + dv * dv || 1)));
+  return [u0 + t * du, v0 + t * dv];
+}).reduce((best, q) => (Math.hypot(q[0] - u, q[1] - v) < Math.hypot(best[0] - u, best[1] - v) ? q : best));
+const ringGap = (a, b) => Math.min(...a.map((q) => ringDistance(q, b)), ...b.map((q) => ringDistance(q, a)));
+check(pedestals.every((i) => {
+  const c = centre(i.footprint_m);
+  const own = desksAll.filter((r) => ringGap(i.footprint_m, r) < 0.1);
+  return own.length > 0 && i.parts.filter((p) => p.material === "handle").every((h) => {
+    // The face carrying the handle: the pedestal edge nearest to it, with its outward normal.
+    const hc = centre(h.polygon_m);
+    const edges = i.footprint_m.map((p, k) => [p, i.footprint_m[(k + 1) % i.footprint_m.length]]);
+    const [[u0, v0], [u1, v1]] = edges.reduce((best, e) => (ringDistance(hc, e) < ringDistance(hc, best) ? e : best));
+    let [nu, nv] = [v1 - v0, -(u1 - u0)];
+    if (nu * (hc[0] - c[0]) + nv * (hc[1] - c[1]) < 0) [nu, nv] = [-nu, -nv];
+    // That face looks away from every desk the pedestal stands against (strictly away when it serves one desk).
+    return own.every((r) => {
+      const [du, dv] = nearestOnRing(c, r);
+      const dot = nu * (c[0] - du) + nv * (c[1] - dv);
+      return own.length === 1 ? dot > 1e-6 : dot >= -1e-6;
+    });
+  });
+}), "pedestal drawers face the aisle, away from the desk they stand against, not to the sides (user)");
+const tiDesk = items.find((i) => i.kind === "desk" && inside([13.8, 0.45], i.footprint_m));
+check(tiDesk && chairs.some((c) => ringDistance(c.position_m, tiDesk.footprint_m) < 0.6),
+  "the Oficina de TI counter beside the mampara is a desk with its own chair (user)");
 check(count("divider") >= 4, "back-to-back workstations share a divider panel");
 
 const chairModel = furniture.chairModel ?? [];
@@ -122,7 +153,7 @@ names = ns["_checkpoint_object_names"](plan, "Floor4_test")
 assert all(f"Floor4_test_{c['id']}" in names for c in chairs)
 palette = ns["PALETTE"]
 assert palette["upholstery"][:3] == (0.03, 0.03, 0.035) and palette["melamine"][:3] == (0.87, 0.74, 0.45) and palette["wood"][:3] == (0.55, 0.36, 0.2)
-assert palette["frosted"][3] >= 0.85, "frosted mamparas must be less transparent"
+assert palette["frosted"][3] >= 0.93 and palette["glass"][3] >= 0.45, "mamparas must be less translucent (user)"
 print(f"PASS: builder adds {len(built)} furniture prisms and {len(plan['chairs'])} generic chair instances (black chairs, light mustard melamine, wood oval table); frosted alpha {palette['frosted'][3]}.")
 `;
 try {
