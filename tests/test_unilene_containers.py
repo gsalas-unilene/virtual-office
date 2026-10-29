@@ -81,5 +81,13 @@ class RunnerTests(unittest.TestCase):
         self.assertTrue(calls[-1].endswith("up -d --wait --wait-timeout 90"))
 
 
+class PublishedPortsTests(unittest.TestCase):
+    def test_only_the_frontend_publishes_a_host_port(self):
+        compose = (ROOT / "compose.yaml").read_text()
+        backend, frontend = compose.split("  frontend:")
+        self.assertNotIn("ports:", backend)
+        self.assertIn('"0.0.0.0:8080:8080"', frontend)
+
+
 if __name__ == "__main__":
     unittest.main()

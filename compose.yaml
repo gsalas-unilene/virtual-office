@@ -16,8 +16,6 @@ services:
       RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE: ${RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE:-no}
       RESERVA_ALLOW_LEGACY_TLS: ${RESERVA_ALLOW_LEGACY_TLS:-0}
       RESERVA_CORS_ORIGINS: ${RESERVA_CORS_ORIGINS:-http://localhost:4200}
-    ports:
-      - "127.0.0.1:8000:8000"
     init: true
     read_only: true
     tmpfs:
@@ -36,7 +34,7 @@ services:
       additional_contexts:
         viewer-source: .
     ports:
-      - "127.0.0.1:4200:8080"
+      - "0.0.0.0:8080:8080"
     depends_on:
       backend:
         condition: service_healthy

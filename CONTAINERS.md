@@ -15,10 +15,10 @@ reconstrucción interrumpe el servicio y cierra las sesiones existentes.
 Se requieren Docker Engine, Compose v2 o posterior e internet para la primera
 construcción.
 
-- Angular: <http://localhost:4200> (compilación estática y Nginx sin privilegios).
-- Estado de la API: <http://localhost:8000/health>.
-- Conexión con la base: <http://localhost:8000/health/ready>.
-- Proxy de la API: <http://localhost:4200/api/health>.
+- Angular: <http://localhost:8080> (compilación estática y Nginx sin privilegios), publicado en `0.0.0.0:8080` para la intranet. Sin HTTPS: pendiente antes de producción.
+- El backend no publica puerto en el host; solo se alcanza por el proxy de Nginx.
+- Estado de la API: <http://localhost:8080/api/health>.
+- Conexión con la base: <http://localhost:8080/api/health/ready>.
 
 Las comprobaciones de salud de los contenedores confirman que los servicios
 están activos, **no** que exista conexión con la base. Los puertos solo se

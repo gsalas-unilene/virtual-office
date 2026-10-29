@@ -40,5 +40,5 @@ docker info >/dev/null 2>&1
 "${compose[@]}" down
 "${compose[@]}" build
 "${compose[@]}" up -d --wait --wait-timeout 90
-echo 'Frontend: http://localhost:4200 | API: http://localhost:8000'
-echo 'Database readiness is separate: http://localhost:8000/health/ready'
+echo 'Frontend: http://localhost:8080 (published on 0.0.0.0; the API is reachable only through /api/)'
+echo 'Database readiness is separate: http://localhost:8080/api/health/ready'
