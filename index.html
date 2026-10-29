@@ -1,33 +1,45 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#172225" />
-    <title>Floor 4 walkthrough</title>
+    <title>Recorrido piso 4</title>
     <style>
       html, body { margin: 0; height: 100%; overflow: hidden; background: #172225; color: #e8ece9; font: 14px system-ui, sans-serif; }
-      .panel { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(23, 34, 37, 0.85); border-radius: 6px; }
-      button { font: inherit; color: inherit; background: #2f4a4f; border: 1px solid #5d7d82; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+      .panel { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(23, 34, 37, 0.85); border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
+      button { font: inherit; color: inherit; background: #2f4a4f; border: 1px solid #5d7d82; border-radius: 10px; padding: 6px 14px; cursor: pointer; }
       .crosshair { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 50%; pointer-events: none; }
       .crosshair[hidden] { display: none; }
-      .panel-puestos { position: fixed; top: 65px; left: 12px; z-index: 2; padding: 10px 12px; background: rgba(23, 34, 37, 0.92); border-radius: 6px; }
+      .panel-puestos { position: fixed; top: 72px; left: 12px; z-index: 2; width: 260px; padding: 14px 16px; background: rgba(23, 34, 37, 0.92); border: 1px solid rgba(130, 207, 173, 0.25); border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
       .panel-puestos[hidden] { display: none; }
-      .panel-puestos select { margin-left: 6px; padding: 4px; color: #172225; background: white; }
-      .panel-puestos p { margin: 8px 0 0; }
+      .panel-puestos label { font-weight: 650; }
+      .panel-puestos select { appearance: none; width: 100%; margin-top: 6px; padding: 10px 36px 10px 12px; color: #e8ece9; color-scheme: dark; background: #2f4a4f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e8ece9' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center; border: 1px solid #5d7d82; border-radius: 12px; font: inherit; cursor: pointer; }
+      .panel-puestos select:focus-visible { outline: 3px solid #82cfad; outline-offset: 2px; }
+      .panel-puestos option { color: #e8ece9; background: #1d2e31; }
+      .panel-puestos p { margin: 10px 0 0; font-size: 13px; line-height: 1.4; color: #c9d6d1; }
+      .leyenda { display: flex; gap: 12px; margin-top: 10px; font-size: 12px; }
+      .leyenda i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; }
+      .ayuda { position: fixed; bottom: 16px; left: 50%; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; max-width: calc(100% - 24px); margin: 0; padding: 10px 18px; font-size: 13px; background: rgba(23, 34, 37, 0.9); border: 1px solid rgba(130, 207, 173, 0.25); border-radius: 999px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); transform: translateX(-50%); pointer-events: none; }
+      kbd { display: inline-block; min-width: 18px; margin-right: 3px; padding: 1px 6px; color: #172225; background: #e8ece9; border-radius: 6px; font: 600 12px system-ui, sans-serif; text-align: center; }
       canvas { display: block; }
     </style>
   </head>
   <body>
     <div class="panel">
-      <button id="mode" type="button">Overview</button>
-      <span id="status" role="status">Loading floor 4 model…</span>
+      <button id="mode" type="button">Vista general</button>
     </div>
+    <p id="status" class="ayuda" role="status">Cargando el modelo del piso 4…</p>
     <div class="crosshair" aria-hidden="true"></div>
     <section class="panel-puestos" id="panel-puestos" aria-label="Selección de puesto" hidden>
       <label for="puesto">Puesto</label>
       <select id="puesto"><option value="">Selecciona un puesto</option></select>
-      <p id="puesto-seleccionado" role="status">Selecciona un número en el plano o en la lista.</p>
+      <p id="puesto-seleccionado" role="status">Apunta a un botón sobre la mesa y pulsa E o clic, o elige el número en la lista.</p>
+      <div class="leyenda" aria-label="Leyenda de estados">
+        <span><i style="background:#1f8a5b"></i>Libre</span>
+        <span><i style="background:#c0392b"></i>Reservado</span>
+        <span><i style="background:#185ca0"></i>Sin dato</span>
+      </div>
     </section>
     <script type="module" src="/src/floor4-viewer.js"></script>
   </body>

@@ -6,18 +6,22 @@ import walls from './floor4-walls.json';
 import furniture from './floor4-furniture.json';
 import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
 import mapaPuestos from '../reserva-unilene-backend/migraciones/mapa_puestos_plano.json';
-import { construirPuestos, esClicCorto } from './puestos-reservables.js';
+import { crearTexturas, asignarUv } from './texturas.js';
+import { construirPuestos, esClicCorto, posicionBoton } from './puestos-reservables.js';
 
 const status = document.querySelector('#status');
 const modeButton = document.querySelector('#mode');
 const crosshair = document.querySelector('.crosshair');
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+// Escena estática: se dibuja solo cuando algo cambia (ver `sucio`), con la GPU de alto rendimiento y densidad de píxeles acotada.
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 // Neutral (colour-preserving) tone mapping and soft shadows; image-based lighting from a neutral room gives glass and boards real reflections.
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.toneMappingExposure = 0.95;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// Nada que proyecte sombras se mueve: el mapa se calcula una sola vez al cargar el modelo.
+renderer.shadowMap.autoUpdate = false;
 document.body.append(renderer.domElement);
 const canvas = renderer.domElement;
 
@@ -30,7 +34,7 @@ scene.add(new THREE.HemisphereLight(0xfffaf0, 0x5a5f60, 0.55));
 // Near-vertical key light standing in for the ceiling fixtures: furniture casts its shadow on the floor below it.
 const sun = new THREE.DirectionalLight(0xfff6e8, 2.2);
 sun.castShadow = true;
-sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.mapSize.set(2048, 2048);
 sun.shadow.bias = -0.0004;
 sun.shadow.normalBias = 0.02;
 sun.shadow.radius = 3;
@@ -39,7 +43,7 @@ scene.add(sun, sun.target);
 
 // Surface finishes by material name (the Blender builder names materials <checkpoint>_<finish>).
 const FINISHES = {
-  floor: { roughness: 0.32, color: 0xd9d6cf },  // porcelain tile
+  floor: { roughness: 0.55, color: 0x9a9d9f },  // gres cementicio gris
   melamine: { roughness: 0.55 },
   wood: { roughness: 0.48 },
   upholstery: { roughness: 0.9 },
@@ -53,6 +57,10 @@ const FINISHES = {
   fixture: { roughness: 0.15 },
 };
 
+const texturas = crearTexturas();
+// Acabado del GLB → textura (concrete y partition comparten la del muro).
+const TEXTURA_DE = { floor: 'floor', wood: 'wood', melamine: 'melamine', wall: 'wall', concrete: 'wall', partition: 'wall' };
+
 function finish(root) {
   root.traverse((object) => {
     if (!object.isMesh) return;
@@ -62,6 +70,12 @@ function finish(root) {
       const { color, ...props } = FINISHES[key];
       Object.assign(material, props);
       if (color !== undefined) material.color.setHex(color);
+      const mapa = texturas[TEXTURA_DE[key]];
+      if (mapa) {
+        asignarUv(object.geometry, mapa.userData.metros);
+        material.map = mapa;
+        material.needsUpdate = true;
+      }
     }
     // Glass lets light through, so it neither casts shadows nor darkens the offices behind it.
     object.castShadow = !material.transparent && key !== 'floor';
@@ -108,28 +122,73 @@ panelSpots.forEach(([u, v], index) => {
 scene.add(panels);
 const EYE = 1.62;
 const RADIUS = 0.25;
-const SPEED = 2.2;
+const SPEED = 3.2;
 const player = { u: SPAWN.u, v: SPAWN.v, yaw: SPAWN.yaw, pitch: 0 };
 const keys = new Set();
-let mode = window.location.hash ? 'overview' : 'walk';
+let mode = window.location.hash && window.location.hash !== '#puestos' ? 'overview' : 'walk';
 const seleccionHabilitada = window.location.hash === '#puestos';
 const panelPuestos = document.querySelector('#panel-puestos');
 const listaPuestos = document.querySelector('#puesto');
 const mensajePuesto = document.querySelector('#puesto-seleccionado');
-const marcadores = [];
+const botones = [];
+// Estado real por número de puesto ('libre' | 'reservado'); sin dato se muestra neutro hasta conectar la API de reservas.
+const estados = new Map();
+const COLORES = { libre: '#1f8a5b', reservado: '#c0392b', sinDato: '#185ca0' };
+const ETIQUETAS = { libre: 'libre', reservado: 'reservado', sinDato: 'sin información de reserva' };
+const rayo = new THREE.Raycaster();
+rayo.far = 4;
 let inicioClic = null;
+let sucio = true;
+const pedirRender = () => { sucio = true; };
+const centroPantalla = new THREE.Vector2();
+let sobre = null;
+let elegido = null;
+
+function dibujarBoton(boton) {
+  const { numero, lienzo, textura } = boton.userData;
+  const estado = estados.get(numero) ?? 'sinDato';
+  const contexto = lienzo.getContext('2d');
+  contexto.fillStyle = boton === elegido ? '#ffc857' : COLORES[estado];
+  contexto.fillRect(0, 0, 128, 128);
+  contexto.fillStyle = boton === elegido ? '#172225' : '#ffffff';
+  contexto.font = 'bold 64px sans-serif';
+  contexto.textAlign = 'center';
+  contexto.textBaseline = 'middle';
+  contexto.fillText(String(numero), 64, 68);
+  textura.needsUpdate = true;
+}
 
 function seleccionarPuesto(numero) {
-  if (!marcadores.some((marcador) => marcador.userData.numero === numero)) return;
+  const boton = botones.find((item) => item.userData.numero === numero);
+  if (!boton) return;
+  pedirRender();
+  const anterior = elegido;
+  elegido = boton;
+  if (anterior) dibujarBoton(anterior);
+  dibujarBoton(boton);
   listaPuestos.value = String(numero);
-  mensajePuesto.textContent = `Puesto ${numero} seleccionado. Todavía no se ha realizado una reserva.`;
-  for (const marcador of marcadores) {
-    marcador.material.color.setHex(marcador.userData.numero === numero ? 0xffc857 : 0xffffff);
-  }
+  mensajePuesto.textContent = `Puesto ${numero}: ${ETIQUETAS[estados.get(numero) ?? 'sinDato']}. Todavía no se ha realizado una reserva.`;
+}
+
+function botonBajoMira(camara, x, y) {
+  rayo.setFromCamera(centroPantalla.set(x, y), camara);
+  return rayo.intersectObjects(botones)[0]?.object ?? null;
+}
+
+function resaltar(boton) {
+  if (boton === sobre) return;
+  pedirRender();
+  if (sobre) sobre.scale.setScalar(1);
+  sobre = boton;
+  if (sobre) sobre.scale.setScalar(1.3);
+  canvas.style.cursor = sobre && mode === 'overview' ? 'pointer' : '';
 }
 
 if (seleccionHabilitada) {
   try {
+    const escritorios = furniture.items.filter((item) => item.kind === 'desk');
+    const geometria = new THREE.CylinderGeometry(0.11, 0.12, 0.04, 40);
+    const base = new THREE.MeshStandardMaterial({ color: 0x172225, roughness: 0.4 });
     for (const puesto of construirPuestos(mapaPuestos, furniture.items)) {
       const opcion = document.createElement('option');
       opcion.value = String(puesto.numero);
@@ -137,43 +196,35 @@ if (seleccionHabilitada) {
       listaPuestos.append(opcion);
       const lienzo = document.createElement('canvas');
       lienzo.width = lienzo.height = 128;
-      const contexto = lienzo.getContext('2d');
-      contexto.fillStyle = '#185ca0';
-      contexto.beginPath();
-      contexto.arc(64, 64, 58, 0, Math.PI * 2);
-      contexto.fill();
-      contexto.fillStyle = '#ffffff';
-      contexto.font = 'bold 58px sans-serif';
-      contexto.textAlign = 'center';
-      contexto.textBaseline = 'middle';
-      contexto.fillText(String(puesto.numero), 64, 66);
       const textura = new THREE.CanvasTexture(lienzo);
       textura.colorSpace = THREE.SRGBColorSpace;
-      const marcador = new THREE.Sprite(new THREE.SpriteMaterial({ map: textura, depthTest: false, depthWrite: false }));
-      marcador.position.set(puesto.posicion[0], 1.35, -puesto.posicion[1]);
-      marcador.scale.set(0.65, 0.65, 1);
-      marcador.renderOrder = 10;
-      marcador.userData.numero = puesto.numero;
-      marcadores.push(marcador);
-      scene.add(marcador);
+      const tapa = new THREE.MeshStandardMaterial({ map: textura, roughness: 0.35, emissiveMap: textura, emissive: 0xffffff, emissiveIntensity: 0.35 });
+      const boton = new THREE.Mesh(geometria, [base, tapa, base]);
+      const [u, v] = posicionBoton(puesto.posicion, escritorios);
+      boton.position.set(u, furniture.heights_m.desk + 0.03, -v);
+      boton.userData = { numero: puesto.numero, lienzo, textura };
+      dibujarBoton(boton);
+      botones.push(boton);
+      scene.add(boton);
     }
     panelPuestos.hidden = false;
     listaPuestos.addEventListener('change', () => seleccionarPuesto(Number(listaPuestos.value)));
     canvas.addEventListener('pointerdown', (evento) => {
       inicioClic = { x: evento.clientX, y: evento.clientY };
     });
+    canvas.addEventListener('pointermove', (evento) => {
+      if (mode !== 'overview') return;
+      const r = canvas.getBoundingClientRect();
+      rayo.far = 200;
+      resaltar(botonBajoMira(overviewCamera, ((evento.clientX - r.left) / r.width) * 2 - 1, -((evento.clientY - r.top) / r.height) * 2 + 1));
+    });
     canvas.addEventListener('pointerup', (evento) => {
       if (mode !== 'overview' || !inicioClic || !esClicCorto(inicioClic, { x: evento.clientX, y: evento.clientY })) return;
-      const rectangulo = canvas.getBoundingClientRect();
-      const posicion = new THREE.Vector2(
-        ((evento.clientX - rectangulo.left) / rectangulo.width) * 2 - 1,
-        -((evento.clientY - rectangulo.top) / rectangulo.height) * 2 + 1,
-      );
-      const rayo = new THREE.Raycaster();
-      rayo.setFromCamera(posicion, overviewCamera);
-      const impacto = rayo.intersectObjects(marcadores)[0];
-      if (impacto) seleccionarPuesto(impacto.object.userData.numero);
+      if (sobre) seleccionarPuesto(sobre.userData.numero);
       inicioClic = null;
+    });
+    document.addEventListener('keydown', (evento) => {
+      if (mode === 'walk' && evento.code === 'KeyE' && sobre) seleccionarPuesto(sobre.userData.numero);
     });
   } catch {
     panelPuestos.hidden = false;
@@ -183,6 +234,7 @@ if (seleccionHabilitada) {
 }
 
 function resize() {
+  pedirRender();
   renderer.setSize(window.innerWidth, window.innerHeight);
   for (const camera of [overviewCamera, walkCamera]) {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -192,17 +244,19 @@ function resize() {
 
 function setMode(next) {
   mode = next;
+  pedirRender();
   keys.clear();
   if (mode === 'overview' && document.pointerLockElement === canvas) document.exitPointerLock();
   ceiling.visible = mode === 'walk';
   panels.visible = mode === 'walk';
   crosshair.hidden = mode !== 'walk';
   orbit.enabled = mode === 'overview';
-  for (const marcador of marcadores) marcador.visible = mode === 'overview';
-  modeButton.textContent = mode === 'walk' ? 'Overview' : 'Walk';
-  status.textContent = mode === 'walk'
-    ? 'Walk · click to look with the mouse · WASD or arrow keys to move · Esc releases the mouse · north runs F→A'
-    : 'Overview · drag to orbit · scroll to zoom · right-drag to pan · north runs F→A';
+  rayo.far = mode === 'walk' ? 4 : 200;
+  resaltar(null);
+  modeButton.textContent = mode === 'walk' ? 'Vista general' : 'Recorrido';
+  status.innerHTML = mode === 'walk'
+    ? '<span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> o <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> moverte</span><span>Clic y mouse: mirar</span><span><kbd>E</kbd> o clic en un botón: elegir puesto</span><span><kbd>Esc</kbd> libera el mouse</span>'
+    : '<span>Arrastrar: girar</span><span>Rueda: acercar</span><span>Clic derecho: desplazar</span><span>Clic en un botón: elegir puesto</span>';
 }
 
 function move(dt) {
@@ -223,10 +277,13 @@ function move(dt) {
 }
 
 canvas.addEventListener('click', () => {
-  if (mode === 'walk' && document.pointerLockElement !== canvas) canvas.requestPointerLock();
+  if (mode !== 'walk') return;
+  if (document.pointerLockElement !== canvas) canvas.requestPointerLock();
+  else if (sobre) seleccionarPuesto(sobre.userData.numero);
 });
 document.addEventListener('mousemove', (event) => {
   if (mode !== 'walk' || document.pointerLockElement !== canvas) return;
+  pedirRender();
   player.yaw -= event.movementX * 0.0025;
   player.pitch = Math.max(-1.3, Math.min(1.3, player.pitch - event.movementY * 0.0025));
 });
@@ -249,6 +306,11 @@ new GLTFLoader().load(
     scene.add(gltf.scene);
     const bounds = new THREE.Box3().setFromObject(gltf.scene);
     const center = bounds.getCenter(new THREE.Vector3());
+    // Estático: sin recalcular matrices por cuadro y con el mapa de sombras generado una vez.
+    gltf.scene.updateMatrixWorld(true);
+    gltf.scene.traverse((object) => { object.matrixAutoUpdate = false; });
+    renderer.shadowMap.needsUpdate = true;
+    pedirRender();
     sun.target.position.copy(center);
     sun.position.set(center.x - 4, 30, center.z + 6);
     orbit.target.copy(center);
@@ -266,7 +328,7 @@ new GLTFLoader().load(
   undefined,
   (error) => {
     console.error('Floor 4 GLB unavailable:', error);
-    status.textContent = 'Floor 4 model unavailable: copy a checkpoint GLB to public/models/floor4.glb.';
+    status.textContent = 'No se pudo cargar el modelo del piso 4.';
   },
 );
 
@@ -275,12 +337,17 @@ renderer.setAnimationLoop((now) => {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
   if (mode === 'walk') {
-    if (document.pointerLockElement === canvas || keys.size) move(dt);
+    const moviendo = keys.size > 0;
+    if (moviendo) move(dt);
+    if (!moviendo && !sucio) return;
+    sucio = false;
     walkCamera.position.set(player.u, EYE, -player.v);
     walkCamera.rotation.set(player.pitch, player.yaw, 0);
+    if (botones.length) resaltar(botonBajoMira(walkCamera, 0, 0));
     renderer.render(scene, walkCamera);
   } else {
-    orbit.update();
+    if (!orbit.update() && !sucio) return;
+    sucio = false;
     renderer.render(scene, overviewCamera);
   }
 });

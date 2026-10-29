@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { construirPuestos, esClicCorto } from '../src/puestos-reservables.js';
+import { construirPuestos, esClicCorto, posicionBoton } from '../src/puestos-reservables.js';
 
 const mapa = JSON.parse(readFileSync(new URL('../reserva-unilene-backend/migraciones/mapa_puestos_plano.json', import.meta.url)));
 const mobiliario = JSON.parse(readFileSync(new URL('../src/floor4-furniture.json', import.meta.url)));
@@ -50,4 +50,23 @@ test('los nodos exportados conservan los identificadores y posiciones', () => {
 test('distingue un clic de un arrastre para conservar el giro de cámara', () => {
   assert.equal(esClicCorto({ x: 10, y: 10 }, { x: 13, y: 12 }), true);
   assert.equal(esClicCorto({ x: 10, y: 10 }, { x: 30, y: 10 }), false);
+});
+
+test('ubica cada botón sobre el tablero de un escritorio cercano a su silla', () => {
+  const escritorios = mobiliario.items.filter((item) => item.kind === 'desk');
+  const dentro = (p, c) => {
+    let d = false;
+    for (let i = 0, j = c.length - 1; i < c.length; j = i++) {
+      if ((c[i][1] > p[1]) !== (c[j][1] > p[1]) && p[0] < ((c[j][0] - c[i][0]) * (p[1] - c[i][1])) / (c[j][1] - c[i][1]) + c[i][0]) d = !d;
+    }
+    return d;
+  };
+  for (const puesto of construirPuestos(mapa, mobiliario.items)) {
+    const [x, y] = posicionBoton(puesto.posicion, escritorios);
+    assert.ok(Math.hypot(x - puesto.posicion[0], y - puesto.posicion[1]) < 1.5, `puesto ${puesto.numero} lejos de su mesa`);
+    // El disco de 0,12 m debe caber en el tablero: sus cuatro extremos también quedan dentro.
+    const cabe = escritorios.some((e) => [[x, y], [x + 0.1, y], [x - 0.1, y], [x, y + 0.1], [x, y - 0.1]].every((q) => dentro(q, e.footprint_m)));
+    assert.ok(cabe, `puesto ${puesto.numero} sobresale del tablero`);
+  }
+  assert.throws(() => posicionBoton([0, 0], []));
 });
