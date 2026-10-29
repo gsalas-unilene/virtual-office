@@ -15,3 +15,4 @@ scripts/__pycache__/
 # Local T3R PDF review crops
 /t3r-review-crops/
 /t3d-review-crops/
+.playwright-mcp/
