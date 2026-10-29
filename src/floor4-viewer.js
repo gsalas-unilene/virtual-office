@@ -8,6 +8,7 @@ import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
 import mapaPuestos from '../reserva-unilene-backend/migraciones/mapa_puestos_plano.json';
 import { crearTexturas, asignarUv } from './texturas.js';
 import { construirPuestos, esClicCorto, posicionBoton } from './puestos-reservables.js';
+import { cargarEstado, reservar, cancelarReserva, mensajeError, textoFecha } from './reservas-api.js';
 
 const status = document.querySelector('#status');
 const modeButton = document.querySelector('#mode');
@@ -131,10 +132,19 @@ const panelPuestos = document.querySelector('#panel-puestos');
 const listaPuestos = document.querySelector('#puesto');
 const mensajePuesto = document.querySelector('#puesto-seleccionado');
 const botones = [];
-// Estado real por número de puesto ('libre' | 'reservado'); sin dato se muestra neutro hasta conectar la API de reservas.
+// Estado real por número de puesto ('libre' | 'reservado' | 'mio'); sin dato si la API no responde.
 const estados = new Map();
-const COLORES = { libre: '#1f8a5b', reservado: '#c0392b', sinDato: '#185ca0' };
-const ETIQUETAS = { libre: 'libre', reservado: 'reservado', sinDato: 'sin información de reserva' };
+let fechaReserva = null;
+let miPuesto = null;
+const COLORES = { libre: '#1f8a5b', reservado: '#c0392b', mio: '#7b3fc4', sinDato: '#185ca0' };
+const ETIQUETAS = { libre: 'libre', reservado: 'reservado', mio: 'tu puesto', sinDato: 'sin información de reserva' };
+const porId = (id) => document.querySelector(`#${id}`);
+const dialogo = porId('dialogo');
+const confirmacion = porId('confirmacion');
+const sugerencia = porId('sugerencia');
+const aviso = porId('aviso');
+let accionPrincipal = null;
+let temporizadorAviso = 0;
 const rayo = new THREE.Raycaster();
 rayo.far = 4;
 let inicioClic = null;
@@ -167,8 +177,106 @@ function seleccionarPuesto(numero) {
   if (anterior) dibujarBoton(anterior);
   dibujarBoton(boton);
   listaPuestos.value = String(numero);
-  mensajePuesto.textContent = `Puesto ${numero}: ${ETIQUETAS[estados.get(numero) ?? 'sinDato']}. Todavía no se ha realizado una reserva.`;
+  mensajePuesto.textContent = `Puesto ${numero}: ${ETIQUETAS[estados.get(numero) ?? 'sinDato']}.`;
+  abrirDialogo(numero);
 }
+
+function avisar(texto, esError = false) {
+  aviso.textContent = texto;
+  aviso.classList.toggle('error', esError);
+  aviso.hidden = false;
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(() => { aviso.hidden = true; }, 5000);
+}
+
+function cerrarDialogo() {
+  dialogo.hidden = true;
+  accionPrincipal = null;
+  pedirRender();
+}
+
+function abrirDialogo(numero) {
+  const estado = estados.get(numero) ?? 'sinDato';
+  const cuando = fechaReserva ? textoFecha(fechaReserva) : 'el próximo día hábil';
+  const principal = porId('dialogo-principal');
+  principal.hidden = false;
+  accionPrincipal = null;
+  porId('dialogo-titulo').textContent = `Puesto ${numero}`;
+  if (estado === 'libre' && miPuesto === null) {
+    porId('dialogo-texto').textContent = `¿Reservar este puesto para el ${cuando}?`;
+    principal.textContent = 'Confirmar reserva';
+    accionPrincipal = () => confirmarReserva(numero);
+  } else if (estado === 'libre') {
+    porId('dialogo-texto').textContent = `Ya tienes el puesto ${miPuesto} reservado para el ${cuando}. Cancélalo si quieres elegir otro.`;
+    principal.textContent = `Cancelar puesto ${miPuesto}`;
+    accionPrincipal = anularReserva;
+  } else if (estado === 'mio') {
+    porId('dialogo-texto').textContent = `Este es tu puesto para el ${cuando}.`;
+    principal.textContent = 'Cancelar mi reserva';
+    accionPrincipal = anularReserva;
+  } else {
+    porId('dialogo-texto').textContent = estado === 'reservado'
+      ? `Este puesto ya está reservado para el ${cuando}.`
+      : 'No se pudo consultar la disponibilidad. Recarga la página.';
+    principal.hidden = true;
+  }
+  dialogo.hidden = false;
+  keys.clear();
+  if (document.pointerLockElement === canvas) document.exitPointerLock();
+  principal.hidden ? porId('dialogo-secundario').focus() : principal.focus();
+}
+
+async function refrescarEstado() {
+  const datos = await cargarEstado();
+  fechaReserva = datos.fecha;
+  miPuesto = datos.mio;
+  for (const boton of botones) {
+    const { numero } = boton.userData;
+    estados.set(numero, numero === datos.mio ? 'mio' : datos.ocupados.includes(numero) ? 'reservado' : 'libre');
+    dibujarBoton(boton);
+  }
+  porId('fecha-reserva').textContent = `Reserva para el ${textoFecha(datos.fecha)}`;
+  porId('aviso-feriados').hidden = datos.feriados_cargados;
+  porId('mi-reserva').hidden = datos.mio === null;
+  porId('mi-reserva-texto').textContent = `Tu puesto: ${datos.mio}`;
+  pedirRender();
+}
+
+async function confirmarReserva(numero) {
+  cerrarDialogo();
+  try {
+    const hecho = await reservar(numero);
+    await refrescarEstado();
+    porId('confirmacion-titulo').textContent = `¡Puesto ${hecho.numero} reservado!`;
+    porId('confirmacion-fecha').textContent = textoFecha(hecho.fecha);
+    confirmacion.hidden = false;
+  } catch (error) {
+    avisar(mensajeError(error), true);
+    refrescarEstado().catch(() => {});
+  }
+}
+
+async function anularReserva() {
+  cerrarDialogo();
+  try {
+    await cancelarReserva();
+    await refrescarEstado();
+    avisar('Reserva cancelada. El puesto quedó libre.');
+  } catch (error) {
+    avisar(mensajeError(error), true);
+  }
+}
+
+porId('dialogo-principal').addEventListener('click', () => accionPrincipal?.());
+porId('dialogo-secundario').addEventListener('click', cerrarDialogo);
+porId('cancelar-mia').addEventListener('click', () => abrirDialogo(miPuesto));
+confirmacion.addEventListener('click', () => { confirmacion.hidden = true; pedirRender(); });
+document.addEventListener('keydown', (evento) => {
+  if (!confirmacion.hidden) { confirmacion.hidden = true; pedirRender(); evento.preventDefault(); evento.stopImmediatePropagation(); return; }
+  if (dialogo.hidden) return;
+  if (evento.code === 'Escape') { cerrarDialogo(); evento.stopImmediatePropagation(); }
+  else if (evento.code === 'Enter' && accionPrincipal && document.activeElement?.id !== 'dialogo-secundario') { evento.preventDefault(); accionPrincipal(); }
+}, true);
 
 function botonBajoMira(camara, x, y) {
   rayo.setFromCamera(centroPantalla.set(x, y), camara);
@@ -181,6 +289,9 @@ function resaltar(boton) {
   if (sobre) sobre.scale.setScalar(1);
   sobre = boton;
   if (sobre) sobre.scale.setScalar(1.3);
+  const { numero } = sobre?.userData ?? {};
+  sugerencia.hidden = !sobre || mode !== 'walk';
+  if (sobre) sugerencia.textContent = `Puesto ${numero} · ${ETIQUETAS[estados.get(numero) ?? 'sinDato']} — pulsa E`;
   canvas.style.cursor = sobre && mode === 'overview' ? 'pointer' : '';
 }
 
@@ -208,6 +319,10 @@ if (seleccionHabilitada) {
       scene.add(boton);
     }
     panelPuestos.hidden = false;
+    refrescarEstado().catch((error) => {
+      porId('fecha-reserva').textContent = 'No se pudo consultar la disponibilidad.';
+      avisar(mensajeError(error), true);
+    });
     listaPuestos.addEventListener('change', () => seleccionarPuesto(Number(listaPuestos.value)));
     canvas.addEventListener('pointerdown', (evento) => {
       inicioClic = { x: evento.clientX, y: evento.clientY };
@@ -224,7 +339,7 @@ if (seleccionHabilitada) {
       inicioClic = null;
     });
     document.addEventListener('keydown', (evento) => {
-      if (mode === 'walk' && evento.code === 'KeyE' && sobre) seleccionarPuesto(sobre.userData.numero);
+      if (mode === 'walk' && evento.code === 'KeyE' && sobre && dialogo.hidden) seleccionarPuesto(sobre.userData.numero);
     });
   } catch {
     panelPuestos.hidden = false;
@@ -288,7 +403,7 @@ document.addEventListener('mousemove', (event) => {
   player.pitch = Math.max(-1.3, Math.min(1.3, player.pitch - event.movementY * 0.0025));
 });
 document.addEventListener('keydown', (event) => {
-  if (mode !== 'walk' || !/^(Key[WASD]|Arrow(Up|Down|Left|Right))$/.test(event.code)) return;
+  if (mode !== 'walk' || !dialogo.hidden || !/^(Key[WASD]|Arrow(Up|Down|Left|Right))$/.test(event.code)) return;
   event.preventDefault();
   keys.add(event.code);
 });

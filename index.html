@@ -22,6 +22,31 @@
       .leyenda i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; }
       .ayuda { position: fixed; bottom: 16px; left: 50%; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; max-width: calc(100% - 24px); margin: 0; padding: 10px 18px; font-size: 13px; background: rgba(23, 34, 37, 0.9); border: 1px solid rgba(130, 207, 173, 0.25); border-radius: 999px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); transform: translateX(-50%); pointer-events: none; }
       kbd { display: inline-block; min-width: 18px; margin-right: 3px; padding: 1px 6px; color: #172225; background: #e8ece9; border-radius: 6px; font: 600 12px system-ui, sans-serif; text-align: center; }
+      .panel-puestos h1 { margin: 0 0 2px; font-size: 15px; }
+      .fecha-reserva { margin: 0 0 12px; font-size: 13px; color: #82cfad; text-transform: capitalize; }
+      .mi-reserva { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 10px 12px; font-size: 13px; background: rgba(123, 63, 196, 0.22); border: 1px solid rgba(180, 140, 240, 0.45); border-radius: 12px; }
+      .mi-reserva[hidden], .aviso[hidden], .sugerencia[hidden], .velo[hidden] { display: none; }
+      .aviso { position: fixed; top: 16px; left: 50%; z-index: 4; max-width: min(520px, calc(100% - 24px)); padding: 10px 18px; background: rgba(23, 34, 37, 0.95); border: 1px solid #5d7d82; border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); transform: translateX(-50%); }
+      .aviso.error { border-color: #e0786b; }
+      .aviso-feriados { margin: 10px 0 0; padding: 8px 10px; font-size: 12px; color: #ffe2a8; background: rgba(255, 200, 87, 0.12); border-radius: 10px; }
+      .sugerencia { position: fixed; top: calc(50% + 26px); left: 50%; z-index: 2; padding: 6px 14px; font-size: 13px; background: rgba(23, 34, 37, 0.92); border-radius: 999px; transform: translateX(-50%); pointer-events: none; white-space: nowrap; }
+      .velo { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 20, 0.55); backdrop-filter: blur(4px); }
+      .tarjeta, .pantalla { width: min(380px, calc(100% - 32px)); padding: 24px; text-align: center; background: #1d2e31; border: 1px solid rgba(130, 207, 173, 0.35); border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+      .tarjeta h2, .pantalla h2 { margin: 0 0 8px; font-size: 22px; }
+      .tarjeta p, .pantalla p { margin: 0 0 18px; color: #c9d6d1; line-height: 1.45; text-transform: none; }
+      .pantalla .fecha { color: #82cfad; text-transform: capitalize; font-weight: 650; }
+      .acciones { display: flex; gap: 10px; justify-content: center; }
+      .acciones button { padding: 10px 18px; border-radius: 12px; }
+      button.primario { color: #0f2a1f; background: #82cfad; border-color: #82cfad; font-weight: 700; }
+      button.primario:hover { background: #9ddcc0; }
+      .atajos { display: block; margin-top: 14px; color: #8fa5a0; }
+      .pantalla { animation: abrir 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); transform-origin: 50% 100%; }
+      .pantalla svg { width: 84px; height: 84px; margin-bottom: 8px; }
+      .pantalla circle { fill: rgba(130, 207, 173, 0.18); stroke: #82cfad; stroke-width: 3; }
+      .pantalla path { fill: none; stroke: #82cfad; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: trazo 0.5s 0.45s ease-out forwards; }
+      @keyframes abrir { from { opacity: 0; transform: perspective(900px) rotateX(55deg) translateY(50px) scale(0.9); } to { opacity: 1; transform: perspective(900px) rotateX(0) translateY(0) scale(1); } }
+      @keyframes trazo { to { stroke-dashoffset: 0; } }
+      @media (prefers-reduced-motion: reduce) { .pantalla, .pantalla path { animation: none; stroke-dashoffset: 0; } }
       canvas { display: block; }
     </style>
   </head>
@@ -32,15 +57,43 @@
     <p id="status" class="ayuda" role="status">Cargando el modelo del piso 4…</p>
     <div class="crosshair" aria-hidden="true"></div>
     <section class="panel-puestos" id="panel-puestos" aria-label="Selección de puesto" hidden>
+      <h1>Reserva de puesto</h1>
+      <p class="fecha-reserva" id="fecha-reserva">Consultando disponibilidad…</p>
       <label for="puesto">Puesto</label>
       <select id="puesto"><option value="">Selecciona un puesto</option></select>
       <p id="puesto-seleccionado" role="status">Apunta a un botón sobre la mesa y pulsa E o clic, o elige el número en la lista.</p>
+      <div class="mi-reserva" id="mi-reserva" hidden>
+        <span id="mi-reserva-texto"></span>
+        <button id="cancelar-mia" type="button">Cancelar</button>
+      </div>
+      <p class="aviso-feriados" id="aviso-feriados" hidden>Los feriados aún no están cargados: la fecha mostrada podría no ser hábil.</p>
       <div class="leyenda" aria-label="Leyenda de estados">
         <span><i style="background:#1f8a5b"></i>Libre</span>
         <span><i style="background:#c0392b"></i>Reservado</span>
-        <span><i style="background:#185ca0"></i>Sin dato</span>
+        <span><i style="background:#7b3fc4"></i>Tu puesto</span>
       </div>
     </section>
+    <div class="sugerencia" id="sugerencia" hidden></div>
+    <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+    <div class="velo" id="dialogo" hidden>
+      <section class="tarjeta" role="dialog" aria-modal="true" aria-labelledby="dialogo-titulo">
+        <h2 id="dialogo-titulo"></h2>
+        <p id="dialogo-texto"></p>
+        <div class="acciones">
+          <button class="primario" id="dialogo-principal" type="button"></button>
+          <button id="dialogo-secundario" type="button">Cerrar</button>
+        </div>
+        <small class="atajos">Enter confirma · Esc cierra</small>
+      </section>
+    </div>
+    <div class="velo" id="confirmacion" role="status" hidden>
+      <section class="pantalla">
+        <svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="38"/><path d="M26 43l11 11 21-24"/></svg>
+        <h2 id="confirmacion-titulo"></h2>
+        <p class="fecha" id="confirmacion-fecha"></p>
+        <small class="atajos">Pulsa cualquier tecla o haz clic para continuar</small>
+      </section>
+    </div>
     <script type="module" src="/src/floor4-viewer.js"></script>
   </body>
 </html>
