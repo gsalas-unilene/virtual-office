@@ -14,7 +14,7 @@ S9. “Solo se puede reservar para el proximo dia habil aunque mejor dejar libre
 
 ## Tasks
 - T1 [S1–S4,S6–S7] inline: sustituir la selección anterior por recorrido, interfaz empresarial y botones 3D; implementado sin commit, falta validación visual con Playwright.
-- T2 [S1,S4,S6–S9] inline: conectar reserva para el próximo día hábil y estado real sin escrituras SQL del asistente; pendiente.
+- T2 [S1,S4,S6–S9] inline: estado real y reserva para el próximo día hábil (`reservas.py`, `reservas-api.js`, diálogo y pantalla de confirmación en primera persona); implementado, sin commit, falta validación del usuario.
 - T3 [S1–S9] inline: verificar compilación y vista con Playwright después del inicio de sesión manual; pendiente.
 
 ## Log
@@ -37,3 +37,6 @@ L15. El avance de interfaz, contenedores y visor quedó guardado en `0298b2d`; e
 L16. Se reemplazaron los marcadores por botones 3D cilíndricos sobre la mesa de cada puesto (`posicionBoton`), visibles en recorrido y vista general, con resaltado al apuntar, selección con E o clic, velocidad 2,2→3,2 m/s y panel con bordes redondeados y leyenda. Estados sin dato hasta T2 (no se simula). Node 6/6 y compilación Vite correctas; Playwright pendiente.
 L17. Tras la prueba del usuario: arranque en primera persona con `#puestos`, ayuda en español y combobox con estilo. Botones 1–4 sobresalían: `posicionBoton` ahora empuja 0,25 m perpendicular al borde y el test exige que el disco de 0,12 m quepa en el tablero (50/50).
 L18. «busca tambien incorporar algunas texturas y darle mas realismo sin perder optimizacion.» Optimización: render solo cuando algo cambia, sombras estáticas calculadas una vez (2048), `matrixAutoUpdate=false` en el GLB, pixel ratio ≤1,5, `powerPreference` alto rendimiento, gzip en nginx. Realismo: texturas procedurales de 256 px (porcelanato, madera, melamina, muro) con UV por proyección de caja en `src/texturas.js`. Playwright no se usa por lentitud del 3D en WSL; la validación visual la hace el usuario. `Dockerfile` incluye `texturas.js`.
+
+L19. «Arranca con el punto 1 y 2. Se debe confirmar con una pantalla en 3d en primear persona anunciado que el asiento se reservo. Agregas mejoras UI/UX.» Backend: `GET /reservas/estado`, `POST /reservas`, `DELETE /reservas/mia`; usuario de la sesión (CodUsuario); fecha de hoy según GETDATE() del SQL Server; un puesto activo por usuario y día; doble reserva evitada por el índice único filtrado. Sin feriados cargados se avisa en la UI, no se bloquea. Cancelar la propia reserva se añadió para poder corregir errores. Pruebas: pytest 22/22 y Node 9/9; no se ejecutaron escrituras contra la base real.
+L20. Fallo reportado por el usuario: al pulsar el puesto 2 salió «No se pudo consultar la disponibilidad». Causa verificada con SELECT: el backend se conecta a PROD_UNILENE2 y las tablas RU_ están en DW_VORTICEDATA (Invalid object name). Corrección: consultas calificadas con `RESERVA_BASE_RESERVAS` (por defecto DW_VORTICEDATA, validado) y registro del error en el log. `estado` devuelve 2026-10-30, sin ocupados ni feriados.
