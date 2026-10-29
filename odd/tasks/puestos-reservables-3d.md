@@ -13,7 +13,7 @@ S8. “una fecha al dia siguiente o al siguiente si existe feriado en la semana�
 S9. “Solo se puede reservar para el proximo dia habil aunque mejor dejar libre otros dias por si recursos humanos lo solicita. Inicialmente sera solo el proximo dia habil.”
 
 ## Tasks
-- T1 [S1–S4,S6–S7] inline: sustituir la selección anterior por recorrido, interfaz empresarial y botones 3D; pendiente.
+- T1 [S1–S4,S6–S7] inline: sustituir la selección anterior por recorrido, interfaz empresarial y botones 3D; implementado sin commit, falta validación visual con Playwright.
 - T2 [S1,S4,S6–S9] inline: conectar reserva para el próximo día hábil y estado real sin escrituras SQL del asistente; pendiente.
 - T3 [S1–S9] inline: verificar compilación y vista con Playwright después del inicio de sesión manual; pendiente.
 
@@ -33,3 +33,7 @@ L12. El usuario eligió preparar una cadena de entregas sobre la rama de funcion
 L13. Se guardó el backend de autenticación en `9154fc7` y las migraciones, el catálogo de puestos y el script manual de feriados en `aba4e77`. Las pruebas de backend 18/18, Node 5/5 y ejecutor de contenedores 5/5 pasaron antes de estos commits. La carga de feriados no está confirmada.
 L14. El siguiente commit conserva la interfaz y la selección 3D anterior como avance pendiente, no como cumplimiento del rediseño solicitado. Falta implementar recorrido empresarial, botones 3D con estado real y reserva para el próximo día hábil; después, la comprobación visual debe esperar el inicio de sesión manual del usuario.
 L15. El avance de interfaz, contenedores y visor quedó guardado en `0298b2d`; el backend está en `9154fc7` y las migraciones y el catálogo en `aba4e77`. Son unidades de la rama de funcionalidad, sin PR creado. T1, T2 y T3 continúan pendientes. El usuario seleccionó una cadena de entregas sobre la rama; las agrupaciones definitivas de PR aún no están decididas.
+
+L16. Se reemplazaron los marcadores por botones 3D cilíndricos sobre la mesa de cada puesto (`posicionBoton`), visibles en recorrido y vista general, con resaltado al apuntar, selección con E o clic, velocidad 2,2→3,2 m/s y panel con bordes redondeados y leyenda. Estados sin dato hasta T2 (no se simula). Node 6/6 y compilación Vite correctas; Playwright pendiente.
+L17. Tras la prueba del usuario: arranque en primera persona con `#puestos`, ayuda en español y combobox con estilo. Botones 1–4 sobresalían: `posicionBoton` ahora empuja 0,25 m perpendicular al borde y el test exige que el disco de 0,12 m quepa en el tablero (50/50).
+L18. «busca tambien incorporar algunas texturas y darle mas realismo sin perder optimizacion.» Optimización: render solo cuando algo cambia, sombras estáticas calculadas una vez (2048), `matrixAutoUpdate=false` en el GLB, pixel ratio ≤1,5, `powerPreference` alto rendimiento, gzip en nginx. Realismo: texturas procedurales de 256 px (porcelanato, madera, melamina, muro) con UV por proyección de caja en `src/texturas.js`. Playwright no se usa por lentitud del 3D en WSL; la validación visual la hace el usuario. `Dockerfile` incluye `texturas.js`.
