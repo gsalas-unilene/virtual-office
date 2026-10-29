@@ -1,12 +1,23 @@
-# UNILENE reservation API
+# API de reservas UNILENE
 
-FastAPI backend managed with `uv` and Python 3.14. The SQL Server connection uses Microsoft's `mssql-python` driver.
+Backend FastAPI administrado con `uv` y Python 3.14. La conexión con SQL Server
+utiliza el controlador `mssql-python` de Microsoft.
 
-## Local setup
+## Configuración local
 
-1. Use `credentials.example.sh` as the variable-name reference and manually configure `credentials.sh`. Git ignores the private file.
-2. Start the API with `./run-dev.sh`.
-3. Check API liveness at `http://127.0.0.1:8000/health` and database connectivity at `http://127.0.0.1:8000/health/ready`.
-4. Run tests with `uv run pytest`.
+1. Use `credentials.example.sh` como referencia para configurar manualmente
+   `credentials.sh`. Git ignora el archivo privado.
+2. Inicie la API con `./run-dev.sh`.
+3. Compruebe el servicio en `http://127.0.0.1:8000/health` y la conexión con
+   la base en `http://127.0.0.1:8000/health/ready`.
+4. Ejecute las pruebas con `uv run pytest`.
 
-The connection settings are `RESERVA_SQLSERVER_SERVER`, `RESERVA_SQLSERVER_DATABASE`, `RESERVA_SQLSERVER_USER`, `RESERVA_SQLSERVER_PASSWORD`, `RESERVA_SQLSERVER_ENCRYPT`, and `RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE`. The Angular application contains only the public API URL, never database credentials or legacy decryption keys. No user-table queries or login behavior are implemented until its schema and encryption format are confirmed.
+La conexión utiliza las variables `RESERVA_SQLSERVER_SERVER`,
+`RESERVA_SQLSERVER_DATABASE`, `RESERVA_SQLSERVER_USER`,
+`RESERVA_SQLSERVER_PASSWORD`, `RESERVA_SQLSERVER_ENCRYPT` y
+`RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE`. El inicio de sesión consulta un
+usuario de SatelliteCore y valida la clave con `SECRET_KEY_LOGIN` en el backend.
+Las credenciales y la clave no deben incorporarse a Angular.
+
+Las migraciones se ejecutan manualmente: consulte `migraciones/README.md`.
+Para la configuración de contenedores y sus límites, consulte `../CONTAINERS.md`.

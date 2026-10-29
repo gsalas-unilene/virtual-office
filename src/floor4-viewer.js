@@ -5,6 +5,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import walls from './floor4-walls.json';
 import furniture from './floor4-furniture.json';
 import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
+import mapaPuestos from '../reserva-unilene-backend/migraciones/mapa_puestos_plano.json';
+import { construirPuestos, esClicCorto } from './puestos-reservables.js';
 
 const status = document.querySelector('#status');
 const modeButton = document.querySelector('#mode');
@@ -110,6 +112,75 @@ const SPEED = 2.2;
 const player = { u: SPAWN.u, v: SPAWN.v, yaw: SPAWN.yaw, pitch: 0 };
 const keys = new Set();
 let mode = window.location.hash ? 'overview' : 'walk';
+const seleccionHabilitada = window.location.hash === '#puestos';
+const panelPuestos = document.querySelector('#panel-puestos');
+const listaPuestos = document.querySelector('#puesto');
+const mensajePuesto = document.querySelector('#puesto-seleccionado');
+const marcadores = [];
+let inicioClic = null;
+
+function seleccionarPuesto(numero) {
+  if (!marcadores.some((marcador) => marcador.userData.numero === numero)) return;
+  listaPuestos.value = String(numero);
+  mensajePuesto.textContent = `Puesto ${numero} seleccionado. Todavía no se ha realizado una reserva.`;
+  for (const marcador of marcadores) {
+    marcador.material.color.setHex(marcador.userData.numero === numero ? 0xffc857 : 0xffffff);
+  }
+}
+
+if (seleccionHabilitada) {
+  try {
+    for (const puesto of construirPuestos(mapaPuestos, furniture.items)) {
+      const opcion = document.createElement('option');
+      opcion.value = String(puesto.numero);
+      opcion.textContent = `Puesto ${puesto.numero}`;
+      listaPuestos.append(opcion);
+      const lienzo = document.createElement('canvas');
+      lienzo.width = lienzo.height = 128;
+      const contexto = lienzo.getContext('2d');
+      contexto.fillStyle = '#185ca0';
+      contexto.beginPath();
+      contexto.arc(64, 64, 58, 0, Math.PI * 2);
+      contexto.fill();
+      contexto.fillStyle = '#ffffff';
+      contexto.font = 'bold 58px sans-serif';
+      contexto.textAlign = 'center';
+      contexto.textBaseline = 'middle';
+      contexto.fillText(String(puesto.numero), 64, 66);
+      const textura = new THREE.CanvasTexture(lienzo);
+      textura.colorSpace = THREE.SRGBColorSpace;
+      const marcador = new THREE.Sprite(new THREE.SpriteMaterial({ map: textura, depthTest: false, depthWrite: false }));
+      marcador.position.set(puesto.posicion[0], 1.35, -puesto.posicion[1]);
+      marcador.scale.set(0.65, 0.65, 1);
+      marcador.renderOrder = 10;
+      marcador.userData.numero = puesto.numero;
+      marcadores.push(marcador);
+      scene.add(marcador);
+    }
+    panelPuestos.hidden = false;
+    listaPuestos.addEventListener('change', () => seleccionarPuesto(Number(listaPuestos.value)));
+    canvas.addEventListener('pointerdown', (evento) => {
+      inicioClic = { x: evento.clientX, y: evento.clientY };
+    });
+    canvas.addEventListener('pointerup', (evento) => {
+      if (mode !== 'overview' || !inicioClic || !esClicCorto(inicioClic, { x: evento.clientX, y: evento.clientY })) return;
+      const rectangulo = canvas.getBoundingClientRect();
+      const posicion = new THREE.Vector2(
+        ((evento.clientX - rectangulo.left) / rectangulo.width) * 2 - 1,
+        -((evento.clientY - rectangulo.top) / rectangulo.height) * 2 + 1,
+      );
+      const rayo = new THREE.Raycaster();
+      rayo.setFromCamera(posicion, overviewCamera);
+      const impacto = rayo.intersectObjects(marcadores)[0];
+      if (impacto) seleccionarPuesto(impacto.object.userData.numero);
+      inicioClic = null;
+    });
+  } catch {
+    panelPuestos.hidden = false;
+    listaPuestos.disabled = true;
+    mensajePuesto.textContent = 'No se pudieron identificar los puestos en el modelo.';
+  }
+}
 
 function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -127,6 +198,7 @@ function setMode(next) {
   panels.visible = mode === 'walk';
   crosshair.hidden = mode !== 'walk';
   orbit.enabled = mode === 'overview';
+  for (const marcador of marcadores) marcador.visible = mode === 'overview';
   modeButton.textContent = mode === 'walk' ? 'Overview' : 'Walk';
   status.textContent = mode === 'walk'
     ? 'Walk · click to look with the mouse · WASD or arrow keys to move · Esc releases the mouse · north runs F→A'

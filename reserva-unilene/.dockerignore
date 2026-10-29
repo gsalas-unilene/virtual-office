@@ -1,0 +1,13 @@
+**
+!Dockerfile
+!package.json
+!bun.lock
+!angular.json
+!tsconfig*.json
+!.postcssrc.json
+!src/
+!src/**
+!public/
+!public/**
+!docker/
+!docker/**

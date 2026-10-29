@@ -1,0 +1,219 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.login-shell {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(ellipse at 12% 12%, rgb(126 186 40 / 8%), transparent 34%),
+    radial-gradient(ellipse at 88% 90%, rgb(31 60 120 / 8%), transparent 38%),
+    #f5f8fa;
+}
+
+.login-card {
+  width: min(100%, 29rem);
+  padding: clamp(1.5rem, 6vw, 2.5rem);
+  border: 1px solid #e2e8ed;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgb(31 60 120 / 10%);
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 3.25rem;
+}
+
+.brand-logo--wide {
+  display: block;
+  width: min(11rem, 45%);
+  height: auto;
+}
+
+.brand-logo--compact {
+  display: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.brand-divider {
+  align-self: stretch;
+  width: 1px;
+  background: #dce3e8;
+}
+
+.product-name {
+  margin: 0;
+  color: #1f3c78;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.login-copy {
+  margin-top: 2.75rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.55rem;
+  color: #58821c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+h1 {
+  margin: 0;
+  color: #1f3c78;
+  font-size: clamp(1.75rem, 6vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.intro {
+  margin: 0.65rem 0 0;
+  color: #5f6b6d;
+  line-height: 1.55;
+}
+
+.login-form {
+  display: grid;
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+label {
+  color: #293537;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #cbd5db;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: #293537;
+  font: inherit;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+input::placeholder {
+  color: #879397;
+}
+
+input:focus-visible {
+  border-color: #1f3c78;
+  box-shadow: 0 0 0 3px rgb(31 60 120 / 15%);
+}
+
+.form-note {
+  margin: -0.3rem 0 0;
+  color: #5f6b6d;
+  font-size: 0.84rem;
+}
+
+.submit-button {
+  min-height: 3rem;
+  margin-top: 0.15rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #1f3c78;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.submit-button:hover {
+  background: #193263;
+}
+
+.submit-button:active {
+  transform: translateY(1px);
+}
+
+.submit-button:focus-visible {
+  outline: 3px solid #7eba28;
+  outline-offset: 3px;
+}
+
+.status-message {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #b6d2e8;
+  border-radius: 0.5rem;
+  background: #f2f8fc;
+  color: #285d7d;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.login-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid #e8edf0;
+}
+
+.login-footer p {
+  margin: 0;
+  color: #5f6b6d;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.footer-mark {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #7eba28;
+}
+
+@media (max-width: 380px) {
+  .brand-logo--wide {
+    display: none;
+  }
+
+  .brand-logo--compact {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.workspace { min-height: 100dvh; background: #edf2f3; display: flex; flex-direction: column; }
+.workspace-header { min-height: 72px; padding: 12px 24px; display: flex; align-items: center; gap: 20px; background: white; border-bottom: 1px solid #dce5e5; }
+.workspace-header img { width: 150px; max-width: 30vw; }
+.workspace-header strong, .workspace-header span { display: block; }
+.workspace-user { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.workspace-user button { cursor: pointer; padding: 8px 12px; border: 1px solid #b9caca; border-radius: 6px; background: white; }
+.viewer-area { flex: 1; min-height: calc(100dvh - 72px); }
+.viewer-area iframe { display: block; width: 100%; height: calc(100dvh - 72px); border: 0; }
+@media (max-width: 600px) { .workspace-header { padding: 10px; gap: 8px; flex-wrap: wrap; } .workspace-user { gap: 6px; } }

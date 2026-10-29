@@ -1,0 +1,12 @@
+# Allowlist: private scripts, .env, caches and host environments never enter builds.
+**
+!Dockerfile
+!pyproject.toml
+!uv.lock
+!README.md
+!src/
+!src/**
+!docker/
+!docker/**
+**/__pycache__/
+**/*.pyc

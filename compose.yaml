@@ -1,0 +1,51 @@
+name: unilene-reservations
+
+services:
+  backend:
+    build:
+      context: ./reserva-unilene-backend
+    environment:
+      RESERVA_SQLSERVER_SERVER: ${RESERVA_SQLSERVER_SERVER:?Required export}
+      RESERVA_SQLSERVER_DATABASE: ${RESERVA_SQLSERVER_DATABASE:?Required export}
+      RESERVA_SQLSERVER_USER: ${RESERVA_SQLSERVER_USER:?Required export}
+      RESERVA_SQLSERVER_PASSWORD: ${RESERVA_SQLSERVER_PASSWORD:?Required export}
+      SECRET_KEY_LOGIN: ${SECRET_KEY_LOGIN:?Required export}
+      RESERVA_SECURE_COOKIE: ${RESERVA_SECURE_COOKIE:-0}
+      RESERVA_SQLSERVER_ENCRYPT: ${RESERVA_SQLSERVER_ENCRYPT:-yes}
+      RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE: ${RESERVA_SQLSERVER_TRUST_SERVER_CERTIFICATE:-no}
+      RESERVA_ALLOW_LEGACY_TLS: ${RESERVA_ALLOW_LEGACY_TLS:-0}
+      RESERVA_CORS_ORIGINS: ${RESERVA_CORS_ORIGINS:-http://localhost:4200}
+    ports:
+      - "127.0.0.1:8000:8000"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).close()"]
+      interval: 10s
+      timeout: 6s
+      retries: 5
+      start_period: 10s
+  frontend:
+    build:
+      context: ./reserva-unilene
+      additional_contexts:
+        viewer-source: .
+    ports:
+      - "127.0.0.1:4200:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

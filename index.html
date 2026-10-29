@@ -11,6 +11,10 @@
       button { font: inherit; color: inherit; background: #2f4a4f; border: 1px solid #5d7d82; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
       .crosshair { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 50%; pointer-events: none; }
       .crosshair[hidden] { display: none; }
+      .panel-puestos { position: fixed; top: 65px; left: 12px; z-index: 2; padding: 10px 12px; background: rgba(23, 34, 37, 0.92); border-radius: 6px; }
+      .panel-puestos[hidden] { display: none; }
+      .panel-puestos select { margin-left: 6px; padding: 4px; color: #172225; background: white; }
+      .panel-puestos p { margin: 8px 0 0; }
       canvas { display: block; }
     </style>
   </head>
@@ -20,6 +24,11 @@
       <span id="status" role="status">Loading floor 4 model…</span>
     </div>
     <div class="crosshair" aria-hidden="true"></div>
+    <section class="panel-puestos" id="panel-puestos" aria-label="Selección de puesto" hidden>
+      <label for="puesto">Puesto</label>
+      <select id="puesto"><option value="">Selecciona un puesto</option></select>
+      <p id="puesto-seleccionado" role="status">Selecciona un número en el plano o en la lista.</p>
+    </section>
     <script type="module" src="/src/floor4-viewer.js"></script>
   </body>
 </html>

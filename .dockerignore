@@ -1,0 +1,17 @@
+# Named viewer build context is intentionally allowlisted; private files excluded.
+**
+!package.json
+!package-lock.json
+!index.html
+!src/
+!src/floor4-viewer.js
+!src/floor4-collision.js
+!src/puestos-reservables.js
+!src/floor4-walls.json
+!src/floor4-furniture.json
+!public/
+!public/models/
+!public/models/floor4.glb
+!reserva-unilene-backend/
+!reserva-unilene-backend/migraciones/
+!reserva-unilene-backend/migraciones/mapa_puestos_plano.json
