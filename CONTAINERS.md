@@ -16,6 +16,7 @@ Se requieren Docker Engine, Compose v2 o posterior e internet para la primera
 construcción.
 
 - Angular: <http://localhost:8080> (compilación estática y Nginx sin privilegios), publicado en `0.0.0.0:8080` para la intranet. Sin HTTPS: pendiente antes de producción.
+- `./run.sh down` detiene este proyecto sin pedir credenciales ni borrar volúmenes.
 - El backend no publica puerto en el host; solo se alcanza por el proxy de Nginx.
 - Estado de la API: <http://localhost:8080/api/health>.
 - Conexión con la base: <http://localhost:8080/api/health/ready>.

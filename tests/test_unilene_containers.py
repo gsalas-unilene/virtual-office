@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RunnerTests(unittest.TestCase):
-    def run_fixture(self, *, missing=False, fail_build=False, legacy="0"):
+    def run_fixture(self, *, missing=False, fail_build=False, legacy="0", args=()):
         with tempfile.TemporaryDirectory(prefix="unilene-run-") as directory:
             root = Path(directory)
             (root / "reserva-unilene-backend").mkdir()
@@ -44,7 +44,7 @@ class RunnerTests(unittest.TestCase):
                 "EXPECTED_LEGACY": legacy,
             }
             result = subprocess.run(
-                ["bash", str(root / "run.sh")], env=environment,
+                ["bash", str(root / "run.sh"), *args], env=environment,
                 cwd="/", text=True, capture_output=True,
             )
             calls = log.read_text().splitlines() if log.exists() else []
@@ -79,6 +79,22 @@ class RunnerTests(unittest.TestCase):
         result, calls = self.run_fixture(legacy="1")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(calls[-1].endswith("up -d --wait --wait-timeout 90"))
+
+
+class DownTests(unittest.TestCase):
+    run_fixture = RunnerTests.run_fixture
+    def test_down_stops_only_this_project_without_credentials(self):
+        result, calls = self.run_fixture(missing=True, args=("down",))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(calls), 1)
+        self.assertIn("--project-name unilene-reservations", calls[0])
+        self.assertTrue(calls[0].endswith(" down"))
+        self.assertNotIn("--volumes", calls[0])
+
+    def test_unknown_arguments_are_rejected_before_docker(self):
+        result, calls = self.run_fixture(args=("down", "--volumes"))
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(calls, [])
 
 
 class PublishedPortsTests(unittest.TestCase):

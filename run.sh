@@ -6,8 +6,16 @@ set -euo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 legacy_override="${RESERVA_ALLOW_LEGACY_TLS-}"
+if [[ "${1-}" == down && $# -eq 1 ]]; then
+  # Stopping needs no secrets: Compose only requires the names to exist, so placeholders satisfy it.
+  # Same fixed project scope as below; volumes are never removed.
+  export RESERVA_SQLSERVER_SERVER=unused RESERVA_SQLSERVER_DATABASE=unused RESERVA_SQLSERVER_USER=unused
+  export RESERVA_SQLSERVER_PASSWORD=unused SECRET_KEY_LOGIN=unused
+  docker compose --project-name unilene-reservations --env-file /dev/null --file "$root/compose.yaml" down
+  exit
+fi
 if (( $# )); then
-  echo 'Usage: ./run.sh (configure exports in credentials.sh)' >&2
+  echo 'Usage: ./run.sh [down] (configure exports in credentials.sh)' >&2
   exit 2
 fi
 if [[ ! -f "$root/reserva-unilene-backend/credentials.sh" ]]; then
