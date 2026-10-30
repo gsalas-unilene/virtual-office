@@ -63,3 +63,42 @@ Los índices filtrados requieren `ANSI_NULLS`, `ANSI_PADDING`, `ANSI_WARNINGS`,
 `NUMERIC_ROUNDABORT` en OFF, en las conexiones que modifican la tabla indexada.
 La migración configura estas opciones para su conexión; las futuras conexiones
 de escritura también deberán aplicarlas.
+
+## Correo de notificación
+
+`0003_correo_usuario.sql` crea `dbo.RU_UsuarioCorreo` (`cod_usuario`, `usuario`,
+`nombre_completo`, `correo`, `rotar`) en **DW_VORTICEDATA**. Es una tabla propia
+porque no se modifica `SatelliteCore..TBMUsuario` (guarda correos personales).
+El correo corporativo y `rotar` se cargan manualmente; el script trae un
+`INSERT` de ejemplo comentado.
+
+**Regla de reserva:** solo puede reservar un usuario con fila en esta tabla,
+correo no vacío y `rotar = 1`. Los demás solo consultan la pestaña «Hoy»; el
+backend responde 403 `no_habilitado` ante cualquier intento de consultar el
+día siguiente o reservar.
+
+### Sincronización de `RU_UsuarioCorreo` (primera carga y cron nocturno)
+
+`src/reserva_unilene_backend/sync_correos.py` (lanzador `run-sync-correos.sh`) mantiene la
+tabla con dos fuentes: la consulta `sql/usuarios_sync.sql` (CodUsuario, USUARIO, NombreCompleto;
+**reemplazar por la consulta definitiva**) y un CSV `usuario,correo,rotar` (ejemplo en
+`correos.example.csv`; el CSV real está en `.gitignore`).
+
+Se eligió **comparar y aplicar solo las diferencias**, no `TRUNCATE` + recarga: una falla a
+mitad de la recarga dejaría la tabla vacía y todos perderían el permiso de reservar; además
+con ≤ 500 filas la comparación es instantánea. Reglas:
+
+- Usuario nuevo en la consulta → se inserta (sin correo y `rotar = 0` si no está en el CSV).
+- Cambio de nombre, correo o `rotar` en el CSV → se actualiza.
+- Usuario que ya no aparece en la consulta (baja) → conserva su fila con `rotar = 0`.
+- Entradas del CSV sin usuario en la consulta → solo se avisan.
+- Se aborta sin cambios si el CSV es inválido (dominio distinto de `@unilene.com`, `rotar` ≠ 0/1,
+  `rotar = 1` sin correo, duplicados) o si la consulta no devuelve usuarios.
+- Todo ocurre en una transacción. **Por defecto solo simula**; `--aplicar` escribe.
+
+```bash
+./run-sync-correos.sh --csv ./correos.csv            # prueba manual (no escribe)
+./run-sync-correos.sh --csv ./correos.csv --aplicar  # escritura real
+# cron: 30 2 * * * /ruta/reserva-unilene-backend/run-sync-correos.sh --aplicar >> /var/log/sync_correos.log 2>&1
+#       (con RESERVA_CORREOS_CSV definido en credentials.sh)
+```
