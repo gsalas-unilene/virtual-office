@@ -11,6 +11,7 @@ import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
 import mapaPuestos from '../reserva-unilene-backend/migraciones/mapa_puestos_plano.json';
 import { crearTexturas, asignarUv } from './texturas.js';
 import { construirPuestos, esClicCorto, posicionBoton } from './puestos-reservables.js';
+import { acercar, construirMapa, desplazar, limitesPlano, textoVista, vistaPuestos } from './mapa-puestos.js';
 import { cargarEstado, reservar, cancelarReserva, mensajeError, textoFecha } from './reservas-api.js';
 
 const status = document.querySelector('#status');
@@ -145,6 +146,8 @@ const ETIQUETAS = { libre: 'libre', reservado: 'reservado', mio: 'tu puesto', si
 const porId = (id) => document.querySelector(`#${id}`);
 const dialogo = porId('dialogo');
 const confirmacion = porId('confirmacion');
+const mapa = porId('mapa');
+const lienzoMapa = porId('mapa-lienzo');
 const sugerencia = porId('sugerencia');
 const aviso = porId('aviso');
 let accionPrincipal = null;
@@ -179,6 +182,31 @@ function seleccionarPuesto(numero) {
   listaPuestos.value = String(numero);
   mensajePuesto.textContent = `Puesto ${numero}: ${ETIQUETAS[estados.get(numero) ?? 'sinDato']}.`;
   abrirDialogo(numero);
+}
+
+// Los marcadores del plano 2D se dibujan una vez; luego solo cambia data-estado.
+function pintarMapa() {
+  for (const marcador of lienzoMapa.querySelectorAll('[data-numero]')) {
+    const numero = Number(marcador.dataset.numero);
+    const estado = estados.get(numero) ?? 'sinDato';
+    marcador.dataset.estado = estado;
+    marcador.setAttribute('aria-label', `Puesto ${numero}: ${ETIQUETAS[estado]}`);
+  }
+  porId('mapa-fecha').textContent = porId('fecha-reserva').textContent;
+}
+
+function abrirMapa() {
+  pintarMapa();
+  mapa.hidden = false;
+  keys.clear();
+  if (document.pointerLockElement === canvas) document.exitPointerLock();
+  porId('cerrar-mapa').focus();
+}
+
+function cerrarMapa() {
+  mapa.hidden = true;
+  porId('abrir-mapa').focus();
+  pedirRender();
 }
 
 function avisar(texto, esError = false) {
@@ -252,6 +280,7 @@ async function refrescarEstado() {
   porId('aviso-feriados').hidden = dia === 'hoy' || datos.feriados_cargados;
   porId('mi-reserva').hidden = dia === 'hoy' || datos.mio === null;
   porId('mi-reserva-texto').textContent = `Tu puesto: ${datos.mio}`;
+  pintarMapa();
   pedirRender();
 }
 
@@ -304,7 +333,10 @@ porId('cancelar-mia').addEventListener('click', () => abrirDialogo(miPuesto));
 confirmacion.addEventListener('click', () => { confirmacion.hidden = true; pedirRender(); });
 document.addEventListener('keydown', (evento) => {
   if (!confirmacion.hidden) { confirmacion.hidden = true; pedirRender(); evento.preventDefault(); evento.stopImmediatePropagation(); return; }
-  if (dialogo.hidden) return;
+  if (dialogo.hidden) {
+    if (!mapa.hidden && evento.code === 'Escape') { cerrarMapa(); evento.stopImmediatePropagation(); }
+    return;
+  }
   if (evento.code === 'Escape') { cerrarDialogo(); evento.stopImmediatePropagation(); }
   else if (evento.code === 'Enter' && accionPrincipal && document.activeElement?.id !== 'dialogo-secundario') { evento.preventDefault(); accionPrincipal(); }
 }, true);
@@ -355,6 +387,59 @@ if (seleccionHabilitada) {
       botones.push(boton);
       scene.add(boton);
     }
+    lienzoMapa.innerHTML = construirMapa(walls, furniture, botones.map((boton) => ({ numero: boton.userData.numero, u: boton.position.x, v: -boton.position.z })));
+    porId('abrir-mapa').addEventListener('click', abrirMapa);
+    porId('cerrar-mapa').addEventListener('click', cerrarMapa);
+    // Zoom y desplazamiento del plano: solo cambia el viewBox del SVG.
+    const limites = limitesPlano(walls);
+    const inicial = vistaPuestos(botones.map((boton) => ({ u: boton.position.x, v: -boton.position.z })));
+    const svgMapa = lienzoMapa.querySelector('svg');
+    let vista = inicial;
+    let arrastre = null;
+    const mostrar = (nueva) => { vista = nueva; svgMapa.setAttribute('viewBox', textoVista(vista)); };
+    const aPlano = (clientX, clientY) => {
+      const r = svgMapa.getBoundingClientRect();
+      const escala = Math.max(vista.w / r.width, vista.h / r.height);
+      return [vista.x + vista.w / 2 + (clientX - r.left - r.width / 2) * escala, vista.y + vista.h / 2 + (clientY - r.top - r.height / 2) * escala, escala];
+    };
+    const centro = () => [vista.x + vista.w / 2, vista.y + vista.h / 2];
+    porId('mapa-mas').addEventListener('click', () => mostrar(acercar(vista, 1.5, ...centro(), limites)));
+    porId('mapa-menos').addEventListener('click', () => mostrar(acercar(vista, 1 / 1.5, ...centro(), limites)));
+    porId('mapa-ajustar').addEventListener('click', () => mostrar(inicial));
+    lienzoMapa.addEventListener('wheel', (evento) => {
+      evento.preventDefault();
+      const [x, y] = aPlano(evento.clientX, evento.clientY);
+      mostrar(acercar(vista, evento.deltaY < 0 ? 1.25 : 0.8, x, y, limites));
+    }, { passive: false });
+    lienzoMapa.addEventListener('pointerdown', (evento) => { arrastre = { x: evento.clientX, y: evento.clientY, movido: false }; });
+    lienzoMapa.addEventListener('pointermove', (evento) => {
+      if (!arrastre) return;
+      const dx = evento.clientX - arrastre.x;
+      const dy = evento.clientY - arrastre.y;
+      if (!arrastre.movido && Math.hypot(dx, dy) <= 6) return;
+      if (!arrastre.movido) { arrastre.movido = true; lienzoMapa.classList.add('arrastrando'); lienzoMapa.setPointerCapture(evento.pointerId); }
+      const escala = aPlano(0, 0)[2];
+      mostrar(desplazar(vista, -dx * escala, -dy * escala, limites));
+      arrastre.x = evento.clientX;
+      arrastre.y = evento.clientY;
+    });
+    const soltar = () => { lienzoMapa.classList.remove('arrastrando'); setTimeout(() => { arrastre = null; }, 0); };
+    lienzoMapa.addEventListener('pointerup', soltar);
+    lienzoMapa.addEventListener('pointercancel', soltar);
+    mapa.addEventListener('click', (evento) => {
+      if (evento.target === mapa) cerrarMapa();
+      if (arrastre?.movido) return;
+      const marcador = evento.target.closest('[data-numero]');
+      if (marcador) seleccionarPuesto(Number(marcador.dataset.numero));
+    });
+    lienzoMapa.addEventListener('keydown', (evento) => {
+      const marcador = evento.target.closest('[data-numero]');
+      if ((evento.code === 'Enter' || evento.code === 'Space') && marcador) {
+        evento.preventDefault();
+        evento.stopPropagation();
+        seleccionarPuesto(Number(marcador.dataset.numero));
+      }
+    });
     panelPuestos.hidden = false;
     refrescarEstado().catch((error) => {
       porId('fecha-reserva').textContent = 'No se pudo consultar la disponibilidad.';

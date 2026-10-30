@@ -51,6 +51,27 @@
       .pestanas button { flex: 1; padding: 8px 6px; font-size: 13px; background: transparent; border-color: transparent; }
       .pestanas button[aria-selected="true"] { color: #10264d; background: #80b927; font-weight: 700; }
       .pestanas button:focus-visible { outline: 3px solid #edf2f6; outline-offset: 2px; }
+      button.ancho { width: 100%; margin-bottom: 12px; }
+      .mapa-tarjeta { display: flex; flex-direction: column; gap: 10px; width: min(98vw, 1500px); height: 96vh; padding: 16px 18px; background: #16346a; border: 1px solid rgba(128, 185, 39, 0.35); border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+      .mapa-tarjeta header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+      .mapa-tarjeta h2 { margin: 0; font-size: 18px; }
+      .mapa-tarjeta header p { margin: 2px 0 0; font-size: 13px; color: #80b927; text-transform: capitalize; }
+      .mapa-tarjeta .leyenda { justify-content: center; margin: 0; }
+      .mapa-zoom { display: flex; gap: 6px; }
+      .mapa-zoom button { min-width: 38px; font-size: 18px; line-height: 1; padding: 6px 10px; }
+      .mapa-lienzo { min-height: 0; flex: 1; display: flex; overflow: hidden; background: #0d2147; border-radius: 14px; cursor: grab; touch-action: none; user-select: none; }
+      .mapa-lienzo.arrastrando { cursor: grabbing; }
+      .mapa-lienzo svg { width: 100%; height: 100%; }
+      .mapa-piso { fill: #edf2f6; stroke: #80b927; stroke-width: 0.12; stroke-linejoin: round; }
+      .mapa-mesa { fill: #c4d0e0; stroke: #8fa3c0; stroke-width: 0.04; }
+      .mapa-tabique { stroke: #6b7a99; stroke-width: 0.1; stroke-linecap: round; }
+      .mapa-puesto { cursor: pointer; outline: none; }
+      .mapa-puesto circle { fill: #6b7a99; stroke: #10264d; stroke-width: 0.05; }
+      .mapa-puesto text { fill: #fff; font: 700 0.3px system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+      .mapa-puesto[data-estado="libre"] circle { fill: #5d9a1c; }
+      .mapa-puesto[data-estado="reservado"] circle { fill: #c0392b; }
+      .mapa-puesto[data-estado="mio"] circle { fill: #2f5fb3; }
+      .mapa-puesto:hover circle, .mapa-puesto:focus-visible circle { stroke: #ffc857; stroke-width: 0.12; }
       canvas { display: block; }
     </style>
   </head>
@@ -68,6 +89,7 @@
       </div>
       <p class="aviso-feriados" id="aviso-sin-reserva" hidden>Tu usuario no tiene habilitada la reserva de puestos: solo puedes consultar los puestos de hoy.</p>
       <p class="fecha-reserva" id="fecha-reserva">Consultando disponibilidad…</p>
+      <button class="ancho" id="abrir-mapa" type="button" aria-haspopup="dialog">Ver mapa de puestos</button>
       <label for="puesto">Puesto</label>
       <select id="puesto"><option value="">Selecciona un puesto</option></select>
       <p id="puesto-seleccionado" role="status">Apunta a un botón sobre la mesa y pulsa E o clic, o elige el número en la lista.</p>
@@ -84,6 +106,28 @@
     </section>
     <div class="sugerencia" id="sugerencia" hidden></div>
     <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
+    <div class="velo" id="mapa" hidden>
+      <section class="mapa-tarjeta" role="dialog" aria-modal="true" aria-labelledby="mapa-titulo">
+        <header>
+          <div>
+            <h2 id="mapa-titulo">Mapa de puestos</h2>
+            <p id="mapa-fecha"></p>
+          </div>
+          <div class="mapa-zoom">
+            <button id="mapa-menos" type="button" aria-label="Alejar">−</button>
+            <button id="mapa-ajustar" type="button" aria-label="Ajustar a los puestos">⤢</button>
+            <button id="mapa-mas" type="button" aria-label="Acercar">+</button>
+            <button id="cerrar-mapa" type="button" aria-label="Cerrar mapa">✕</button>
+          </div>
+        </header>
+        <div class="mapa-lienzo" id="mapa-lienzo"></div>
+        <div class="leyenda" aria-label="Leyenda de estados">
+          <span><i style="background:#5d9a1c"></i>Libre</span>
+          <span><i style="background:#c0392b"></i>Reservado</span>
+          <span><i style="background:#2f5fb3"></i>Tu puesto</span>
+        </div>
+      </section>
+    </div>
     <div class="velo" id="dialogo" hidden>
       <section class="tarjeta" role="dialog" aria-modal="true" aria-labelledby="dialogo-titulo">
         <h2 id="dialogo-titulo"></h2>

@@ -3,7 +3,7 @@ FROM node:24-alpine AS viewer
 WORKDIR /viewer
 COPY --from=viewer-source package.json package-lock.json index.html ./
 RUN --mount=type=cache,target=/root/.npm npm ci
-COPY --from=viewer-source src/floor4-viewer.js src/floor4-collision.js src/puestos-reservables.js src/texturas.js src/reservas-api.js src/floor4-walls.json src/floor4-furniture.json ./src/
+COPY --from=viewer-source src/floor4-viewer.js src/floor4-collision.js src/puestos-reservables.js src/mapa-puestos.js src/texturas.js src/reservas-api.js src/floor4-walls.json src/floor4-furniture.json ./src/
 COPY --from=viewer-source reserva-unilene-backend/migraciones/mapa_puestos_plano.json ./reserva-unilene-backend/migraciones/mapa_puestos_plano.json
 COPY --from=viewer-source public/models/floor4.glb ./public/models/floor4.glb
 RUN printf '%s\n' 'import { defineConfig } from "vite";' 'export default defineConfig({ base: "/viewer/" });' > vite.config.js && npm run build
