@@ -372,6 +372,13 @@ N'                  </td>
                 line-height:1.9;
             ">
                 <li>
+                <strong>
+                    El mapa de ubicación de los puestos se encuentra
+                    disponible en la misma aplicación de reserva.
+                    </strong>
+                </li>
+
+                <li>
                     Verifica el puesto asignado antes
                     de acudir a las instalaciones.
                 </li>
