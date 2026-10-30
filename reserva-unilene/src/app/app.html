@@ -1,4 +1,6 @@
-@if (username()) {
+@if (instructivo) {
+  <app-instructivo />
+} @else if (username()) {
   <main class="workspace">
     <header class="workspace-header">
       <img src="/logo_largo.png" alt="UNILENE — Aliados de la salud" />
@@ -64,6 +66,7 @@
       <span class="footer-mark" aria-hidden="true"></span>
       <p>Acceso exclusivo para colaboradores de UNILENE S.A.C.</p>
     </footer>
+    <a class="instructivo-link" href="/instructivo">¿Cómo reservar? Ver instructivo</a>
   </section>
 </main>
 }

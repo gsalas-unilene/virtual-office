@@ -1,0 +1,72 @@
+<main class="instructivo">
+  <header class="cabecera">
+    <img src="/logo_largo.png" alt="UNILENE — Aliados de la salud" />
+    <div>
+      <h1>Cómo reservar tu puesto</h1>
+      <p>Instructivo del visor del piso 4</p>
+    </div>
+    <button class="iniciar" type="button" (click)="iniciar()">▶ Iniciar recorrido</button>
+  </header>
+
+  <ol class="resumen">
+    <li>Inicia sesión con tu usuario.</li>
+    <li>Elige <strong>Día hábil siguiente</strong> y busca un puesto <span class="verde">verde</span> en el 3D, en el mapa o en la lista.</li>
+    <li>Pulsa <strong>Confirmar reserva</strong>. Recibirás un correo con el puesto y la fecha.</li>
+    <li>Si no lo necesitas, pulsa <strong>Cancelar</strong> para liberarlo.</li>
+  </ol>
+
+  <section class="escena" aria-label="Maqueta del visor con datos de ejemplo">
+    <div class="visor" id="paso-visor">
+      <button class="modo" type="button" tabindex="-1">Vista general</button>
+      <svg viewBox="0 0 300 160" aria-hidden="true">
+        <polygon class="piso" points="10,10 290,10 290,150 10,150" />
+        <rect class="mesa" x="60" y="40" width="90" height="16" /><rect class="mesa" x="60" y="62" width="90" height="16" />
+        <rect class="mesa" x="180" y="40" width="80" height="16" /><rect class="mesa" x="180" y="62" width="80" height="16" />
+        <rect class="mesa" x="60" y="105" width="120" height="16" />
+        <g class="p libre"><circle cx="78" cy="48" r="7" /><text x="78" y="48">9</text></g>
+        <g class="p reservado"><circle cx="105" cy="48" r="7" /><text x="105" y="48">10</text></g>
+        <g class="p libre"><circle cx="132" cy="48" r="7" /><text x="132" y="48">11</text></g>
+        <g class="p libre"><circle cx="78" cy="70" r="7" /><text x="78" y="70">12</text></g>
+        <g class="p mio"><circle cx="105" cy="70" r="7" /><text x="105" y="70">13</text></g>
+        <g class="p reservado"><circle cx="132" cy="70" r="7" /><text x="132" y="70">14</text></g>
+        <g class="p libre"><circle cx="198" cy="48" r="7" /><text x="198" y="48">15</text></g>
+        <g class="p libre"><circle cx="225" cy="48" r="7" /><text x="225" y="48">16</text></g>
+        <g class="p reservado"><circle cx="198" cy="70" r="7" /><text x="198" y="70">17</text></g>
+        <g class="p libre"><circle cx="90" cy="113" r="7" /><text x="90" y="113">18</text></g>
+      </svg>
+
+      <section class="panel" aria-label="Panel de reserva (ejemplo)">
+        <h2>Reserva de puesto</h2>
+        <div class="pestanas" id="paso-pestanas">
+          <span>Hoy</span><span class="activa">Día hábil siguiente</span>
+        </div>
+        <p class="fecha">Reserva para el lunes 2 de noviembre</p>
+        <button class="ancho" id="paso-mapa" type="button" tabindex="-1">Ver mapa de puestos</button>
+        <label>Puesto</label>
+        <div class="lista" id="paso-lista">Puesto 13</div>
+        <div class="mia" id="paso-mia"><span>Tu puesto: 13</span><button type="button" tabindex="-1">Cancelar</button></div>
+        <div class="leyenda" id="paso-leyenda">
+          <span><i class="libre"></i>Libre</span><span><i class="reservado"></i>Reservado</span><span><i class="mio"></i>Tu puesto</span>
+        </div>
+        <p class="aviso" id="paso-aviso">Tu usuario no tiene habilitada la reserva de puestos: solo puedes consultar los puestos de hoy.</p>
+      </section>
+    </div>
+
+    <div class="tarjetas">
+      <section class="dialogo" id="paso-dialogo" aria-label="Diálogo de reserva (ejemplo)">
+        <h2>Puesto 12</h2>
+        <p>¿Reservar este puesto para el lunes 2 de noviembre?</p>
+        <div class="acciones"><button class="primario" type="button" tabindex="-1">Confirmar reserva</button><button type="button" tabindex="-1">Cerrar</button></div>
+        <small>Enter confirma · Esc cierra</small>
+      </section>
+      <section class="correo" id="paso-correo" aria-label="Correo de confirmación (ejemplo)">
+        <strong>Reserva de puesto confirmada</strong>
+        <p>Nombre Apellido · Puesto 12 · lunes, 02 de noviembre de 2026</p>
+      </section>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <a href="/">Ir a iniciar sesión</a>
+  </footer>
+</main>

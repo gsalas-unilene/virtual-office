@@ -217,3 +217,12 @@ input:focus-visible {
 .viewer-area { flex: 1; min-height: calc(100dvh - 72px); }
 .viewer-area iframe { display: block; width: 100%; height: calc(100dvh - 72px); border: 0; }
 @media (max-width: 600px) { .workspace-header { padding: 10px; gap: 8px; flex-wrap: wrap; } .workspace-user { gap: 6px; } }
+
+.instructivo-link {
+  display: block;
+  margin-top: 1rem;
+  color: #1d3d77;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-align: center;
+}
