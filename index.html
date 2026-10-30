@@ -72,6 +72,8 @@
       .mapa-puesto[data-estado="reservado"] circle { fill: #c0392b; }
       .mapa-puesto[data-estado="mio"] circle { fill: #2f5fb3; }
       .mapa-puesto:hover circle, .mapa-puesto:focus-visible circle { stroke: #ffc857; stroke-width: 0.12; }
+      .banner-demo { position: fixed; top: 12px; right: 12px; z-index: 3; display: flex; gap: 12px; align-items: center; padding: 8px 12px; font-size: 13px; background: rgba(16, 38, 78, 0.92); border: 1px solid rgba(128, 185, 39, 0.45); border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); }
+      .banner-demo[hidden] { display: none; }
       canvas { display: block; }
     </style>
   </head>
@@ -104,6 +106,10 @@
         <span><i style="background:#2f5fb3"></i>Tu puesto</span>
       </div>
     </section>
+    <div class="banner-demo" id="banner-demo" hidden>
+      <span>Modo demostración: nada se reserva de verdad.</span>
+      <button class="primario" id="iniciar-tutorial" type="button">▶ Iniciar recorrido</button>
+    </div>
     <div class="sugerencia" id="sugerencia" hidden></div>
     <div class="aviso" id="aviso" role="status" aria-live="polite" hidden></div>
     <div class="velo" id="mapa" hidden>
