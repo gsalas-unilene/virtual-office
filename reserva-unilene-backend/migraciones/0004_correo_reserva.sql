@@ -40,7 +40,8 @@ BEGIN
     RETURN;
 END;
 
-EXEC (N'CREATE OR ALTER PROCEDURE dbo.RU_EnviarCorreoReserva
+EXEC (N'
+ ALTER PROCEDURE dbo.RU_EnviarCorreoReserva
     @cod_usuario INT,
     @puesto VARCHAR(40),
     @fecha DATE
@@ -48,16 +49,22 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- =====================================================
+    -- 1. Declaración de variables
+    -- =====================================================
+
     DECLARE
         @correo NVARCHAR(254),
         @nombre NVARCHAR(200),
-        @cuerpo NVARCHAR(MAX),
-        @fecha_formateada NVARCHAR(50),
+        @nombre_html NVARCHAR(1000),
         @puesto_html NVARCHAR(200),
-        @nombre_html NVARCHAR(1000);
+        @fecha_formateada NVARCHAR(100),
+        @anio NVARCHAR(4),
+        @pie_pagina NVARCHAR(MAX),
+        @cuerpo NVARCHAR(MAX);
 
     -- =====================================================
-    -- 1. Obtener información del usuario
+    -- 2. Obtener datos del usuario
     -- =====================================================
 
     SELECT
@@ -70,39 +77,80 @@ BEGIN
         RETURN;
 
     -- =====================================================
-    -- 2. Formatear información
+    -- 3. Preparar datos dinámicos
     -- =====================================================
+
+    SET @anio = CONVERT(NVARCHAR(4), YEAR(GETDATE()));
 
     SET @fecha_formateada =
         FORMAT(@fecha, 'dddd, dd ''de'' MMMM ''de'' yyyy', 'es-ES');
 
-    -- Escapar caracteres especiales para HTML
-    SET @nombre_html = ISNULL(@nombre, N'Usuario');
+    -- Escapar caracteres especiales de HTML
+    SET @nombre_html = ISNULL(@nombre, N'Colaborador');
 
-    SET @nombre_html = REPLACE(@nombre_html, '&', '&amp;');
-    SET @nombre_html = REPLACE(@nombre_html, '<', '&lt;');
-    SET @nombre_html = REPLACE(@nombre_html, '>', '&gt;');
-    SET @nombre_html = REPLACE(@nombre_html, '"', '&quot;');
-    SET @nombre_html = REPLACE(@nombre_html, '''', '&#39;');
+    SET @nombre_html = REPLACE(@nombre_html, N'&', N'&amp;');
+    SET @nombre_html = REPLACE(@nombre_html, N'<', N'&lt;');
+    SET @nombre_html = REPLACE(@nombre_html, N'>', N'&gt;');
+    SET @nombre_html = REPLACE(@nombre_html, N'"', N'&quot;');
+    SET @nombre_html = REPLACE(@nombre_html, N'''', N'&#39;');
 
-    SET @puesto_html = CONVERT(NVARCHAR(200), @puesto);
+    SET @puesto_html = ISNULL(CONVERT(NVARCHAR(200), @puesto), N'No especificado');
 
-    SET @puesto_html = REPLACE(@puesto_html, '&', '&amp;');
-    SET @puesto_html = REPLACE(@puesto_html, '<', '&lt;');
-    SET @puesto_html = REPLACE(@puesto_html, '>', '&gt;');
-    SET @puesto_html = REPLACE(@puesto_html, '"', '&quot;');
-    SET @puesto_html = REPLACE(@puesto_html, '''', '&#39;');
+    SET @puesto_html = REPLACE(@puesto_html, N'&', N'&amp;');
+    SET @puesto_html = REPLACE(@puesto_html, N'<', N'&lt;');
+    SET @puesto_html = REPLACE(@puesto_html, N'>', N'&gt;');
+    SET @puesto_html = REPLACE(@puesto_html, N'"', N'&quot;');
+    SET @puesto_html = REPLACE(@puesto_html, N'''', N'&#39;');
 
     -- =====================================================
-    -- 3. Construir correo HTML
+    -- 4. Construir pie de página por separado
     -- =====================================================
 
-    SET @cuerpo = N'
-<!DOCTYPE html>
+    SET @pie_pagina = CONCAT(
+        N'
+        <tr>
+            <td style="
+                background-color:#f8fafc;
+                padding:25px;
+                text-align:center;
+                border-top:1px solid #e2e8f0;
+            ">
+                <p style="
+                    font-size:12px;
+                    color:#64748b;
+                    margin:0;
+                    line-height:1.7;
+                ">
+                    Este es un correo automático generado por
+                    el Sistema de Reserva de Asientos.
+                    <br>
+                    Por favor, no respondas a este mensaje.
+                </p>
+
+                <p style="
+                    font-size:11px;
+                    color:#94a3b8;
+                    margin-top:15px;
+                ">
+                    &copy; ',
+        @anio,
+        N' | Reserva de Asientos
+                </p>
+            </td>
+        </tr>'
+    );
+
+    -- =====================================================
+    -- 5. Construir cuerpo HTML principal
+    -- =====================================================
+
+    SET @cuerpo = CONCAT(
+N'<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 </head>
 
 <body style="
@@ -122,320 +170,261 @@ BEGIN
 <tr>
 <td align="center">
 
-    <!-- CONTENEDOR PRINCIPAL -->
-    <table role="presentation"
-           width="600"
-           cellpadding="0"
-           cellspacing="0"
-           border="0"
-           style="
-                width:100%;
-                max-width:600px;
-                background-color:#ffffff;
-                border-radius:12px;
-                overflow:hidden;
-                border:1px solid #e2e8f0;
-           ">
+<table role="presentation"
+       width="600"
+       cellpadding="0"
+       cellspacing="0"
+       border="0"
+       style="
+           width:100%;
+           max-width:600px;
+           background-color:#ffffff;
+           border-radius:12px;
+           overflow:hidden;
+           border:1px solid #e2e8f0;
+       ">
 
-        <!-- ENCABEZADO -->
-        <tr>
-            <td style="
-                background-color:#17365d;
-                padding:30px;
-                text-align:center;
+    <!-- ENCABEZADO -->
+    <tr>
+        <td style="
+            background-color:#17365d;
+            padding:30px;
+            text-align:center;
+        ">
+            <h1 style="
+                color:#ffffff;
+                font-size:24px;
+                margin:0;
+                font-weight:600;
             ">
+                Reserva de Asientos
+            </h1>
 
-                <h1 style="
-                    color:#ffffff;
-                    font-size:24px;
-                    margin:0;
-                    font-weight:600;
-                ">
-                    Reserva de Asientos
-                </h1>
-
-                <p style="
-                    color:#cbd5e1;
-                    font-size:14px;
-                    margin:10px 0 0 0;
-                ">
-                    Sistema de Gestión de Espacios de Trabajo
-                </p>
-
-            </td>
-        </tr>
-
-        <!-- CONTENIDO -->
-        <tr>
-            <td style="padding:35px 35px 20px 35px;">
-
-                <!-- ESTADO -->
-                <table role="presentation"
-                       width="100%"
-                       cellpadding="0"
-                       cellspacing="0"
-                       border="0"
-                       style="
-                           background-color:#ecfdf5;
-                           border:1px solid #a7f3d0;
-                           border-radius:8px;
-                       ">
-
-                    <tr>
-                        <td style="
-                            padding:16px;
-                            text-align:center;
-                            color:#047857;
-                            font-size:17px;
-                            font-weight:bold;
-                        ">
-                            &#10003; Reserva confirmada
-                        </td>
-                    </tr>
-
-                </table>
-
-                <p style="
-                    font-size:16px;
-                    margin-top:30px;
-                    line-height:1.6;
-                ">
-                    Hola, <strong>' + @nombre_html + N'</strong>:
-                </p>
-
-                <p style="
-                    font-size:15px;
-                    line-height:1.7;
-                    color:#475569;
-                ">
-                    Te informamos que tu reserva de puesto de trabajo
-                    se ha registrado correctamente en nuestro sistema.
-                </p>
-
-                <p style="
-                    font-size:15px;
-                    line-height:1.7;
-                    color:#475569;
-                ">
-                    A continuación, encontrarás los detalles
-                    de tu reserva:
-                </p>
-
-                <!-- DETALLE DE RESERVA -->
-                <table role="presentation"
-                       width="100%"
-                       cellpadding="0"
-                       cellspacing="0"
-                       border="0"
-                       style="
-                           margin-top:25px;
-                           background-color:#f8fafc;
-                           border:1px solid #e2e8f0;
-                           border-radius:8px;
-                       ">
-
-                    <tr>
-                        <td colspan="2"
-                            style="
-                                padding:18px 20px;
-                                font-size:16px;
-                                font-weight:bold;
-                                color:#17365d;
-                                border-bottom:1px solid #e2e8f0;
-                            ">
-                            Detalles de tu reserva
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="
-                            padding:15px 20px;
-                            font-size:14px;
-                            color:#64748b;
-                            width:40%;
-                        ">
-                            Puesto asignado
-                        </td>
-
-                        <td style="
-                            padding:15px 20px;
-                            font-size:15px;
-                            font-weight:bold;
-                            color:#0f172a;
-                        ">
-                            ' + @puesto_html + N'
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="
-                            padding:15px 20px;
-                            font-size:14px;
-                            color:#64748b;
-                            border-top:1px solid #e2e8f0;
-                        ">
-                            Fecha de reserva
-                        </td>
-
-                        <td style="
-                            padding:15px 20px;
-                            font-size:15px;
-                            font-weight:bold;
-                            color:#0f172a;
-                            border-top:1px solid #e2e8f0;
-                        ">
-                            ' + @fecha_formateada + N'
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="
-                            padding:15px 20px;
-                            font-size:14px;
-                            color:#64748b;
-                            border-top:1px solid #e2e8f0;
-                        ">
-                            Estado
-                        </td>
-
-                        <td style="
-                            padding:15px 20px;
-                            font-size:14px;
-                            font-weight:bold;
-                            color:#059669;
-                            border-top:1px solid #e2e8f0;
-                        ">
-                            CONFIRMADA
-                        </td>
-                    </tr>
-
-                </table>
-
-                <!-- RECOMENDACIONES -->
-                <h3 style="
-                    color:#17365d;
-                    font-size:16px;
-                    margin-top:30px;
-                ">
-                    Recomendaciones importantes
-                </h3>
-
-                <ul style="
-                    padding-left:20px;
-                    color:#475569;
-                    font-size:14px;
-                    line-height:1.9;
-                ">
-                    <li>
-                        Verifica el puesto asignado antes
-                        de acudir a las instalaciones.
-                    </li>
-
-                    <li>
-                        Utiliza únicamente el espacio de
-                        trabajo correspondiente a tu reserva.
-                    </li>
-
-                    <li>
-                        Mantén el espacio limpio y ordenado
-                        durante y después de su uso.
-                    </li>
-                    
-                </ul>
-
-                <!-- AVISO -->
-                <table role="presentation"
-                       width="100%"
-                       cellpadding="0"
-                       cellspacing="0"
-                       border="0"
-                       style="
-                           margin-top:25px;
-                           background-color:#eff6ff;
-                           border-left:4px solid #2563eb;
-                       ">
-
-                    <tr>
-                        <!-- <td style="
-                            padding:16px;
-                            font-size:13px;
-                            color:#1e40af;
-                            line-height:1.7;
-                        ">
-                            <strong>Importante:</strong><br>
-                            Esta notificación confirma tu reserva
-                            para la fecha indicada.
-                            Si necesitas modificarla o cancelarla,
-                            ingresa a la aplicación
-                            Reserva de Asientos.
-                        </td> -->
-                    </tr>
-
-                </table>
-
-                <p style="
-                    margin-top:10px;
-                    font-size:14px;
-                    line-height:1.7;
-                ">
-                    Gracias por contribuir al uso eficiente
-                    y organizado de nuestros espacios de trabajo.
-                </p>
-
-                <p style="
-                    font-size:14px;
-                    line-height:1.7;
-                ">
-                    Saludos cordiales,<br>
-                    <strong>Sistema Reserva de Asientos</strong><br>
-                </p>
-
-            </td>
-        </tr>
-
-        <!-- PIE DE PÁGINA -->
-        <tr>
-            <td style="
-                background-color:#f8fafc;
-                padding:25px;
-                text-align:center;
-                border-top:1px solid #e2e8f0;
+            <p style="
+                color:#cbd5e1;
+                font-size:14px;
+                margin:10px 0 0 0;
             ">
+                Sistema de Gestión de Espacios de Trabajo
+            </p>
+        </td>
+    </tr>
 
-                <p style="
-                    font-size:12px;
-                    color:#64748b;
-                    margin:0;
-                    line-height:1.7;
-                ">
-                    Este es un correo automático generado por
-                    el Sistema de Reserva de Asientos.
-                    <br>
-                    Por favor, no respondas a este mensaje.
-                </p>
+    <!-- CONTENIDO PRINCIPAL -->
+    <tr>
+        <td style="padding:35px 35px 20px 35px;">
 
-                <p style="
-                    font-size:11px;
-                    color:#94a3b8;
-                    margin-top:15px;
-                ">
-                    © ' + CONVERT(NVARCHAR(4), YEAR(GETDATE())) + N'
-                    | Reserva de Asientos
-                </p>
+            <!-- CONFIRMACIÓN -->
+            <table role="presentation"
+                   width="100%"
+                   cellpadding="0"
+                   cellspacing="0"
+                   border="0"
+                   style="
+                       background-color:#ecfdf5;
+                       border:1px solid #a7f3d0;
+                       border-radius:8px;
+                   ">
+                <tr>
+                    <td style="
+                        padding:16px;
+                        text-align:center;
+                        color:#047857;
+                        font-size:17px;
+                        font-weight:bold;
+                    ">
+                        &#10003; Reserva confirmada
+                    </td>
+                </tr>
+            </table>
 
-            </td>
-        </tr>
+            <p style="
+                font-size:16px;
+                margin-top:30px;
+                line-height:1.6;
+            ">
+                Hola, <strong>',
+                @nombre_html,
+N'</strong>:
+            </p>
 
-    </table>
+            <p style="
+                font-size:15px;
+                line-height:1.7;
+                color:#475569;
+            ">
+                Te informamos que tu reserva de puesto
+                de trabajo se ha registrado correctamente
+                en nuestro sistema.
+            </p>
 
+            <p style="
+                font-size:15px;
+                line-height:1.7;
+                color:#475569;
+            ">
+                A continuación, encontrarás los detalles
+                correspondientes a tu reserva:
+            </p>
+
+            <!-- DETALLE DE RESERVA -->
+            <table role="presentation"
+                   width="100%"
+                   cellpadding="0"
+                   cellspacing="0"
+                   border="0"
+                   style="
+                       margin-top:25px;
+                       background-color:#f8fafc;
+                       border:1px solid #e2e8f0;
+                       border-radius:8px;
+                   ">
+
+                <tr>
+                    <td colspan="2" style="
+                        padding:18px 20px;
+                        font-size:16px;
+                        font-weight:bold;
+                        color:#17365d;
+                        border-bottom:1px solid #e2e8f0;
+                    ">
+                        Detalles de tu reserva
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="
+                        padding:15px 20px;
+                        font-size:14px;
+                        color:#64748b;
+                        width:40%;
+                    ">
+                        Puesto asignado
+                    </td>
+
+                    <td style="
+                        padding:15px 20px;
+                        font-size:15px;
+                        font-weight:bold;
+                        color:#0f172a;
+                    ">',
+                    @puesto_html,
+N'                  </td>
+                </tr>
+
+                <tr>
+                    <td style="
+                        padding:15px 20px;
+                        font-size:14px;
+                        color:#64748b;
+                        border-top:1px solid #e2e8f0;
+                    ">
+                        Fecha de reserva
+                    </td>
+
+                    <td style="
+                        padding:15px 20px;
+                        font-size:15px;
+                        font-weight:bold;
+                        color:#0f172a;
+                        border-top:1px solid #e2e8f0;
+                    ">',
+                    @fecha_formateada,
+N'                  </td>
+                </tr>
+
+                <tr>
+                    <td style="
+                        padding:15px 20px;
+                        font-size:14px;
+                        color:#64748b;
+                        border-top:1px solid #e2e8f0;
+                    ">
+                        Estado
+                    </td>
+
+                    <td style="
+                        padding:15px 20px;
+                        font-size:14px;
+                        font-weight:bold;
+                        color:#059669;
+                        border-top:1px solid #e2e8f0;
+                    ">
+                        CONFIRMADA
+                    </td>
+                </tr>
+
+            </table>
+
+            <!-- RECOMENDACIONES -->
+            <h3 style="
+                color:#17365d;
+                font-size:16px;
+                margin-top:30px;
+            ">
+                Recomendaciones importantes
+            </h3>
+
+            <ul style="
+                padding-left:20px;
+                color:#475569;
+                font-size:14px;
+                line-height:1.9;
+            ">
+                <li>
+                    Verifica el puesto asignado antes
+                    de acudir a las instalaciones.
+                </li>
+
+                <li>
+                    Utiliza únicamente el espacio de
+                    trabajo correspondiente a tu reserva.
+                </li>
+
+                <li>
+                    Mantén el espacio limpio y ordenado
+                    durante y después de su uso.
+                </li>
+            </ul>   
+
+            <!-- DESPEDIDA -->
+            <p style="
+                margin-top:30px;
+                font-size:14px;
+                line-height:1.7;
+            ">
+                Gracias por contribuir al uso eficiente
+                y organizado de nuestros espacios
+                de trabajo.
+            </p>
+
+            <p style="
+                font-size:14px;
+                line-height:1.7;
+            ">
+                Saludos cordiales,
+                <br>
+                <strong>Sistema Reserva de Asientos</strong>                
+            </p>
+
+        </td>
+    </tr>',
+
+    -- Incorporar pie de página dinámico
+    @pie_pagina,
+
+N'
+</table>
 </td>
 </tr>
 </table>
+
 </body>
-</html>';
+</html>'
+    );
 
     -- =====================================================
-    -- 4. Enviar correo
+    -- 6. Enviar correo
     -- =====================================================
 
     EXEC msdb.dbo.sp_send_dbmail
