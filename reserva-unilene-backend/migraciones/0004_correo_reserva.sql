@@ -392,7 +392,43 @@ N'                  </td>
                     Mantén el espacio limpio y ordenado
                     durante y después de su uso.
                 </li>
+
+                 <li>
+                    Si no utilizarás el puesto,
+                    cancela tu reserva desde la aplicación
+                    para que otro colaborador
+                    pueda utilizarlo.
+                </li>
             </ul>   
+
+              <!-- MENSAJE INFORMATIVO -->
+            <table role="presentation"
+                   width="100%"
+                   cellpadding="0"
+                   cellspacing="0"
+                   border="0"
+                   style="
+                       margin-top:25px;
+                       background-color:#eff6ff;
+                       border-left:4px solid #2563eb;
+                   ">
+                <tr>
+                    <td style="
+                        padding:16px;
+                        font-size:13px;
+                        color:#1e40af;
+                        line-height:1.7;
+                    ">
+                        <strong>Importante:</strong>
+                        <br>
+                        Esta notificación confirma tu
+                        reserva para la fecha indicada.
+                        Si necesitas modificarla o
+                        cancelarla, ingresa a la aplicación
+                        Reserva de Asientos.
+                    </td>
+                </tr>
+            </table>
 
             <!-- DESPEDIDA -->
             <p style="
