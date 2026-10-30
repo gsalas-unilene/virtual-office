@@ -14,6 +14,10 @@ import { construirPuestos, esClicCorto, posicionBoton } from './puestos-reservab
 import { acercar, construirMapa, desplazar, limitesPlano, textoVista, vistaPuestos } from './mapa-puestos.js';
 import { cargarEstado, reservar, cancelarReserva, mensajeError, textoFecha } from './reservas-api.js';
 
+// Modo demostración (/demo/?demo): API simulada y recorrido guiado, sin sesión ni base de datos.
+const demo = new URLSearchParams(window.location.search).has('demo');
+if (demo) await import('./demo-api.js');
+
 const status = document.querySelector('#status');
 const modeButton = document.querySelector('#mode');
 const crosshair = document.querySelector('.crosshair');
@@ -130,7 +134,7 @@ const RADIUS = 0.25;
 const SPEED = 3.2;
 const player = { u: SPAWN.u, v: SPAWN.v, yaw: SPAWN.yaw, pitch: 0 };
 const keys = new Set();
-let mode = window.location.hash && window.location.hash !== '#puestos' ? 'overview' : 'walk';
+let mode = demo || (window.location.hash && window.location.hash !== '#puestos') ? 'overview' : 'walk';
 const seleccionHabilitada = window.location.hash === '#puestos';
 const panelPuestos = document.querySelector('#panel-puestos');
 const listaPuestos = document.querySelector('#puesto');
@@ -441,6 +445,10 @@ if (seleccionHabilitada) {
       }
     });
     panelPuestos.hidden = false;
+    if (demo) {
+      porId('banner-demo').hidden = false;
+      porId('iniciar-tutorial').addEventListener('click', async () => (await import('./tutorial-demo.js')).iniciarTutorial());
+    }
     refrescarEstado().catch((error) => {
       porId('fecha-reserva').textContent = 'No se pudo consultar la disponibilidad.';
       avisar(mensajeError(error), true);
@@ -537,7 +545,7 @@ resize();
 setMode(mode);
 
 new GLTFLoader().load(
-  '/models/floor4.glb',
+  demo ? `${import.meta.env.BASE_URL}models/floor4.glb` : '/models/floor4.glb',
   (gltf) => {
     finish(gltf.scene);
     scene.add(gltf.scene);

@@ -17,3 +17,4 @@ scripts/__pycache__/
 /t3d-review-crops/
 .playwright-mcp/
 reserva-unilene-backend/correos.csv
+dist-demo/
