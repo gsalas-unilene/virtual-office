@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import fuenteNumeros from 'three/examples/fonts/helvetiker_bold.typeface.json';
 import walls from './floor4-walls.json';
 import furniture from './floor4-furniture.json';
 import { buildObstacles, isBlocked, SPAWN } from './floor4-collision.js';
@@ -27,7 +30,7 @@ document.body.append(renderer.domElement);
 const canvas = renderer.domElement;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x172225);
+scene.background = new THREE.Color(0x10264d);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.3;
@@ -136,7 +139,8 @@ const botones = [];
 const estados = new Map();
 let fechaReserva = null;
 let miPuesto = null;
-const COLORES = { libre: '#1f8a5b', reservado: '#c0392b', mio: '#7b3fc4', sinDato: '#185ca0' };
+// Paleta del logo de Unilene: verde #80b927 y azul #1d3d77 (tonos algo más oscuros para que el número blanco contraste).
+const COLORES = { libre: '#5d9a1c', reservado: '#c0392b', mio: '#2f5fb3', sinDato: '#6b7a99' };
 const ETIQUETAS = { libre: 'libre', reservado: 'reservado', mio: 'tu puesto', sinDato: 'sin información de reserva' };
 const porId = (id) => document.querySelector(`#${id}`);
 const dialogo = porId('dialogo');
@@ -144,6 +148,8 @@ const confirmacion = porId('confirmacion');
 const sugerencia = porId('sugerencia');
 const aviso = porId('aviso');
 let accionPrincipal = null;
+let diaActivo = 'siguiente';
+let reservando = false;
 let temporizadorAviso = 0;
 const rayo = new THREE.Raycaster();
 rayo.far = 4;
@@ -155,17 +161,11 @@ let sobre = null;
 let elegido = null;
 
 function dibujarBoton(boton) {
-  const { numero, lienzo, textura } = boton.userData;
-  const estado = estados.get(numero) ?? 'sinDato';
-  const contexto = lienzo.getContext('2d');
-  contexto.fillStyle = boton === elegido ? '#ffc857' : COLORES[estado];
-  contexto.fillRect(0, 0, 128, 128);
-  contexto.fillStyle = boton === elegido ? '#172225' : '#ffffff';
-  contexto.font = 'bold 64px sans-serif';
-  contexto.textAlign = 'center';
-  contexto.textBaseline = 'middle';
-  contexto.fillText(String(numero), 64, 68);
-  textura.needsUpdate = true;
+  const { numero, tapa, letras } = boton.userData;
+  const color = boton === elegido ? '#ffc857' : COLORES[estados.get(numero) ?? 'sinDato'];
+  tapa.color.set(color);
+  tapa.emissive.set(color);
+  letras.color.set(boton === elegido ? '#10264d' : '#ffffff');
 }
 
 function seleccionarPuesto(numero) {
@@ -202,7 +202,10 @@ function abrirDialogo(numero) {
   principal.hidden = false;
   accionPrincipal = null;
   porId('dialogo-titulo').textContent = `Puesto ${numero}`;
-  if (estado === 'libre' && miPuesto === null) {
+  if (diaActivo === 'hoy') {
+    porId('dialogo-texto').textContent = { libre: 'Este puesto está libre hoy.', reservado: 'Este puesto está reservado hoy.', mio: 'Este es tu puesto de hoy.' }[estado] ?? 'No se pudo consultar la disponibilidad. Recarga la página.';
+    principal.hidden = true;
+  } else if (estado === 'libre' && miPuesto === null) {
     porId('dialogo-texto').textContent = `¿Reservar este puesto para el ${cuando}?`;
     principal.textContent = 'Confirmar reserva';
     accionPrincipal = () => confirmarReserva(numero);
@@ -227,7 +230,17 @@ function abrirDialogo(numero) {
 }
 
 async function refrescarEstado() {
-  const datos = await cargarEstado();
+  const dia = diaActivo;
+  let datos;
+  try {
+    datos = await cargarEstado(dia);
+  } catch (error) {
+    // Sin permiso para reservar solo existe la pestaña «Hoy».
+    if (error.codigo === 'no_habilitado' && dia === 'siguiente') { soloHoy(); return; }
+    throw error;
+  }
+  if (dia !== diaActivo) return;
+  if (!datos.puede_reservar) soloHoy();
   fechaReserva = datos.fecha;
   miPuesto = datos.mio;
   for (const boton of botones) {
@@ -235,15 +248,17 @@ async function refrescarEstado() {
     estados.set(numero, numero === datos.mio ? 'mio' : datos.ocupados.includes(numero) ? 'reservado' : 'libre');
     dibujarBoton(boton);
   }
-  porId('fecha-reserva').textContent = `Reserva para el ${textoFecha(datos.fecha)}`;
-  porId('aviso-feriados').hidden = datos.feriados_cargados;
-  porId('mi-reserva').hidden = datos.mio === null;
+  porId('fecha-reserva').textContent = dia === 'hoy' ? `Reservas de hoy, ${textoFecha(datos.fecha)}` : `Reserva para el ${textoFecha(datos.fecha)}`;
+  porId('aviso-feriados').hidden = dia === 'hoy' || datos.feriados_cargados;
+  porId('mi-reserva').hidden = dia === 'hoy' || datos.mio === null;
   porId('mi-reserva-texto').textContent = `Tu puesto: ${datos.mio}`;
   pedirRender();
 }
 
 async function confirmarReserva(numero) {
   cerrarDialogo();
+  if (reservando) return;
+  reservando = true;
   try {
     const hecho = await reservar(numero);
     await refrescarEstado();
@@ -253,6 +268,8 @@ async function confirmarReserva(numero) {
   } catch (error) {
     avisar(mensajeError(error), true);
     refrescarEstado().catch(() => {});
+  } finally {
+    reservando = false;
   }
 }
 
@@ -267,6 +284,20 @@ async function anularReserva() {
   }
 }
 
+function soloHoy() {
+  porId('tab-siguiente').hidden = true;
+  porId('aviso-sin-reserva').hidden = false;
+  cambiarDia('hoy');
+}
+
+function cambiarDia(dia) {
+  if (dia === diaActivo) return;
+  diaActivo = dia;
+  for (const tab of document.querySelectorAll('.pestanas button')) tab.setAttribute('aria-selected', String(tab.dataset.dia === dia));
+  porId('fecha-reserva').textContent = 'Consultando disponibilidad…';
+  refrescarEstado().catch((error) => avisar(mensajeError(error), true));
+}
+for (const tab of document.querySelectorAll('.pestanas button')) tab.addEventListener('click', () => cambiarDia(tab.dataset.dia));
 porId('dialogo-principal').addEventListener('click', () => accionPrincipal?.());
 porId('dialogo-secundario').addEventListener('click', cerrarDialogo);
 porId('cancelar-mia').addEventListener('click', () => abrirDialogo(miPuesto));
@@ -280,7 +311,8 @@ document.addEventListener('keydown', (evento) => {
 
 function botonBajoMira(camara, x, y) {
   rayo.setFromCamera(centroPantalla.set(x, y), camara);
-  return rayo.intersectObjects(botones)[0]?.object ?? null;
+  const golpe = rayo.intersectObjects(botones, true)[0]?.object;
+  return golpe?.userData.numero ? golpe : golpe?.parent ?? null;
 }
 
 function resaltar(boton) {
@@ -298,22 +330,27 @@ function resaltar(boton) {
 if (seleccionHabilitada) {
   try {
     const escritorios = furniture.items.filter((item) => item.kind === 'desk');
-    const geometria = new THREE.CylinderGeometry(0.11, 0.12, 0.04, 40);
-    const base = new THREE.MeshStandardMaterial({ color: 0x172225, roughness: 0.4 });
+    const geometria = new THREE.CylinderGeometry(0.13, 0.14, 0.04, 40);
+    const base = new THREE.MeshStandardMaterial({ color: 0x10264d, roughness: 0.4 });
+    const fuente = new FontLoader().parse(fuenteNumeros);
     for (const puesto of construirPuestos(mapaPuestos, furniture.items)) {
       const opcion = document.createElement('option');
       opcion.value = String(puesto.numero);
       opcion.textContent = `Puesto ${puesto.numero}`;
       listaPuestos.append(opcion);
-      const lienzo = document.createElement('canvas');
-      lienzo.width = lienzo.height = 128;
-      const textura = new THREE.CanvasTexture(lienzo);
-      textura.colorSpace = THREE.SRGBColorSpace;
-      const tapa = new THREE.MeshStandardMaterial({ map: textura, roughness: 0.35, emissiveMap: textura, emissive: 0xffffff, emissiveIntensity: 0.35 });
+      const tapa = new THREE.MeshStandardMaterial({ roughness: 0.35, emissiveIntensity: 0.3 });
+      const letras = new THREE.MeshStandardMaterial({ roughness: 0.4 });
       const boton = new THREE.Mesh(geometria, [base, tapa, base]);
+      // Número en relieve sobre la base: queda a ras de la mesa y se lee desde la vista general y desde el recorrido.
+      const geometriaNumero = new TextGeometry(String(puesto.numero), { font: fuente, size: 0.11, depth: 0.03, curveSegments: 3, bevelEnabled: false });
+      geometriaNumero.center();
+      const numero3d = new THREE.Mesh(geometriaNumero, letras);
+      numero3d.rotation.x = -Math.PI / 2;
+      numero3d.position.y = 0.02 + 0.015;
+      boton.add(numero3d);
       const [u, v] = posicionBoton(puesto.posicion, escritorios);
       boton.position.set(u, furniture.heights_m.desk + 0.03, -v);
-      boton.userData = { numero: puesto.numero, lienzo, textura };
+      boton.userData = { numero: puesto.numero, tapa, letras };
       dibujarBoton(boton);
       botones.push(boton);
       scene.add(boton);

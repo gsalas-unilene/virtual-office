@@ -15,8 +15,8 @@ test('reservar envía solo el número y la sesión viaja por cookie', async () =
 
 test('traduce los códigos del servidor a mensajes claros', async () => {
   await assert.rejects(reservar(3, respuesta(409, { detail: 'ocupado' })), (e) => e instanceof ErrorReserva && e.codigo === 'ocupado');
-  await assert.rejects(cargarEstado(respuesta(401, {})), (e) => e.codigo === 'sesion');
-  await assert.rejects(cargarEstado(async () => { throw new TypeError('red'); }), (e) => e.codigo === 'red');
+  await assert.rejects(cargarEstado('siguiente', respuesta(401, {})), (e) => e.codigo === 'sesion');
+  await assert.rejects(cargarEstado('hoy', async () => { throw new TypeError('red'); }), (e) => e.codigo === 'red');
   assert.match(mensajeError(new ErrorReserva('ocupado')), /otra persona/);
   assert.match(mensajeError(new ErrorReserva('ya_tienes')), /Cancélalo/);
   assert.match(mensajeError(new ErrorReserva('xyz')), /Inténtalo/);

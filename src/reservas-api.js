@@ -12,6 +12,7 @@ const MENSAJES = {
   puesto_invalido: 'Ese puesto no está disponible para reservar.',
   sin_reserva: 'No tienes una reserva activa para cancelar.',
   sesion: 'Tu sesión terminó. Vuelve a iniciar sesión.',
+  no_habilitado: 'Tu usuario no tiene habilitada la reserva de puestos.',
 };
 
 export const mensajeError = (error) => MENSAJES[error?.codigo] ?? 'No se pudo completar la acción. Inténtalo nuevamente.';
@@ -30,7 +31,7 @@ async function llamar(ruta, opciones = {}, fetchImpl = fetch) {
   return cuerpo;
 }
 
-export const cargarEstado = (fetchImpl) => llamar('/reservas/estado', {}, fetchImpl);
+export const cargarEstado = (dia = 'siguiente', fetchImpl) => llamar(`/reservas/estado?dia=${dia}`, {}, fetchImpl);
 export const reservar = (numero, fetchImpl) => llamar('/reservas', {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ numero }),
 }, fetchImpl);

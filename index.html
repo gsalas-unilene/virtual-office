@@ -3,50 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#172225" />
+    <meta name="theme-color" content="#10264d" />
     <title>Recorrido piso 4</title>
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #172225; color: #e8ece9; font: 14px system-ui, sans-serif; }
-      .panel { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(23, 34, 37, 0.85); border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
-      button { font: inherit; color: inherit; background: #2f4a4f; border: 1px solid #5d7d82; border-radius: 10px; padding: 6px 14px; cursor: pointer; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #10264d; color: #edf2f6; font: 14px system-ui, sans-serif; }
+      .panel { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(16, 38, 78, 0.85); border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
+      button { font: inherit; color: inherit; background: #1d3d77; border: 1px solid #4d6fa8; border-radius: 10px; padding: 6px 14px; cursor: pointer; }
       .crosshair { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 50%; pointer-events: none; }
       .crosshair[hidden] { display: none; }
-      .panel-puestos { position: fixed; top: 72px; left: 12px; z-index: 2; width: 260px; padding: 14px 16px; background: rgba(23, 34, 37, 0.92); border: 1px solid rgba(130, 207, 173, 0.25); border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
+      .panel-puestos { position: fixed; top: 72px; left: 12px; z-index: 2; width: 260px; padding: 14px 16px; background: rgba(16, 38, 78, 0.92); border: 1px solid rgba(128, 185, 39, 0.25); border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); backdrop-filter: blur(6px); }
       .panel-puestos[hidden] { display: none; }
       .panel-puestos label { font-weight: 650; }
-      .panel-puestos select { appearance: none; width: 100%; margin-top: 6px; padding: 10px 36px 10px 12px; color: #e8ece9; color-scheme: dark; background: #2f4a4f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e8ece9' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center; border: 1px solid #5d7d82; border-radius: 12px; font: inherit; cursor: pointer; }
-      .panel-puestos select:focus-visible { outline: 3px solid #82cfad; outline-offset: 2px; }
-      .panel-puestos option { color: #e8ece9; background: #1d2e31; }
-      .panel-puestos p { margin: 10px 0 0; font-size: 13px; line-height: 1.4; color: #c9d6d1; }
+      .panel-puestos select { appearance: none; width: 100%; margin-top: 6px; padding: 10px 36px 10px 12px; color: #edf2f6; color-scheme: dark; background: #1d3d77 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e8ece9' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 14px center; border: 1px solid #4d6fa8; border-radius: 12px; font: inherit; cursor: pointer; }
+      .panel-puestos select:focus-visible { outline: 3px solid #80b927; outline-offset: 2px; }
+      .panel-puestos option { color: #edf2f6; background: #16346a; }
+      .panel-puestos p { margin: 10px 0 0; font-size: 13px; line-height: 1.4; color: #d7e0ee; }
       .leyenda { display: flex; gap: 12px; margin-top: 10px; font-size: 12px; }
       .leyenda i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; }
-      .ayuda { position: fixed; bottom: 16px; left: 50%; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; max-width: calc(100% - 24px); margin: 0; padding: 10px 18px; font-size: 13px; background: rgba(23, 34, 37, 0.9); border: 1px solid rgba(130, 207, 173, 0.25); border-radius: 999px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); transform: translateX(-50%); pointer-events: none; }
-      kbd { display: inline-block; min-width: 18px; margin-right: 3px; padding: 1px 6px; color: #172225; background: #e8ece9; border-radius: 6px; font: 600 12px system-ui, sans-serif; text-align: center; }
+      .ayuda { position: fixed; bottom: 16px; left: 50%; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; max-width: calc(100% - 24px); margin: 0; padding: 10px 18px; font-size: 13px; background: rgba(16, 38, 78, 0.9); border: 1px solid rgba(128, 185, 39, 0.25); border-radius: 999px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); transform: translateX(-50%); pointer-events: none; }
+      kbd { display: inline-block; min-width: 18px; margin-right: 3px; padding: 1px 6px; color: #10264d; background: #edf2f6; border-radius: 6px; font: 600 12px system-ui, sans-serif; text-align: center; }
       .panel-puestos h1 { margin: 0 0 2px; font-size: 15px; }
-      .fecha-reserva { margin: 0 0 12px; font-size: 13px; color: #82cfad; text-transform: capitalize; }
-      .mi-reserva { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 10px 12px; font-size: 13px; background: rgba(123, 63, 196, 0.22); border: 1px solid rgba(180, 140, 240, 0.45); border-radius: 12px; }
+      .fecha-reserva { margin: 0 0 12px; font-size: 13px; color: #80b927; text-transform: capitalize; }
+      .mi-reserva { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; padding: 10px 12px; font-size: 13px; background: rgba(29, 61, 119, 0.22); border: 1px solid rgba(128, 185, 39, 0.45); border-radius: 12px; }
       .mi-reserva[hidden], .aviso[hidden], .sugerencia[hidden], .velo[hidden] { display: none; }
-      .aviso { position: fixed; top: 16px; left: 50%; z-index: 4; max-width: min(520px, calc(100% - 24px)); padding: 10px 18px; background: rgba(23, 34, 37, 0.95); border: 1px solid #5d7d82; border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); transform: translateX(-50%); }
+      .aviso { position: fixed; top: 16px; left: 50%; z-index: 4; max-width: min(520px, calc(100% - 24px)); padding: 10px 18px; background: rgba(16, 38, 78, 0.95); border: 1px solid #4d6fa8; border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); transform: translateX(-50%); }
       .aviso.error { border-color: #e0786b; }
       .aviso-feriados { margin: 10px 0 0; padding: 8px 10px; font-size: 12px; color: #ffe2a8; background: rgba(255, 200, 87, 0.12); border-radius: 10px; }
-      .sugerencia { position: fixed; top: calc(50% + 26px); left: 50%; z-index: 2; padding: 6px 14px; font-size: 13px; background: rgba(23, 34, 37, 0.92); border-radius: 999px; transform: translateX(-50%); pointer-events: none; white-space: nowrap; }
+      .sugerencia { position: fixed; top: calc(50% + 26px); left: 50%; z-index: 2; padding: 6px 14px; font-size: 13px; background: rgba(16, 38, 78, 0.92); border-radius: 999px; transform: translateX(-50%); pointer-events: none; white-space: nowrap; }
       .velo { position: fixed; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(10, 18, 20, 0.55); backdrop-filter: blur(4px); }
-      .tarjeta, .pantalla { width: min(380px, calc(100% - 32px)); padding: 24px; text-align: center; background: #1d2e31; border: 1px solid rgba(130, 207, 173, 0.35); border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
+      .tarjeta, .pantalla { width: min(380px, calc(100% - 32px)); padding: 24px; text-align: center; background: #16346a; border: 1px solid rgba(128, 185, 39, 0.35); border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
       .tarjeta h2, .pantalla h2 { margin: 0 0 8px; font-size: 22px; }
-      .tarjeta p, .pantalla p { margin: 0 0 18px; color: #c9d6d1; line-height: 1.45; text-transform: none; }
-      .pantalla .fecha { color: #82cfad; text-transform: capitalize; font-weight: 650; }
+      .tarjeta p, .pantalla p { margin: 0 0 18px; color: #d7e0ee; line-height: 1.45; text-transform: none; }
+      .pantalla .fecha { color: #80b927; text-transform: capitalize; font-weight: 650; }
       .acciones { display: flex; gap: 10px; justify-content: center; }
       .acciones button { padding: 10px 18px; border-radius: 12px; }
-      button.primario { color: #0f2a1f; background: #82cfad; border-color: #82cfad; font-weight: 700; }
-      button.primario:hover { background: #9ddcc0; }
-      .atajos { display: block; margin-top: 14px; color: #8fa5a0; }
+      button.primario { color: #10264d; background: #80b927; border-color: #80b927; font-weight: 700; }
+      button.primario:hover { background: #97d03f; }
+      .atajos { display: block; margin-top: 14px; color: #9fb3d1; }
       .pantalla { animation: abrir 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); transform-origin: 50% 100%; }
       .pantalla svg { width: 84px; height: 84px; margin-bottom: 8px; }
-      .pantalla circle { fill: rgba(130, 207, 173, 0.18); stroke: #82cfad; stroke-width: 3; }
-      .pantalla path { fill: none; stroke: #82cfad; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: trazo 0.5s 0.45s ease-out forwards; }
+      .pantalla circle { fill: rgba(128, 185, 39, 0.18); stroke: #80b927; stroke-width: 3; }
+      .pantalla path { fill: none; stroke: #80b927; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: trazo 0.5s 0.45s ease-out forwards; }
       @keyframes abrir { from { opacity: 0; transform: perspective(900px) rotateX(55deg) translateY(50px) scale(0.9); } to { opacity: 1; transform: perspective(900px) rotateX(0) translateY(0) scale(1); } }
       @keyframes trazo { to { stroke-dashoffset: 0; } }
       @media (prefers-reduced-motion: reduce) { .pantalla, .pantalla path { animation: none; stroke-dashoffset: 0; } }
+      .pestanas { display: flex; gap: 4px; margin: 0 0 12px; padding: 4px; background: rgba(0, 0, 0, 0.25); border-radius: 12px; }
+      .pestanas button { flex: 1; padding: 8px 6px; font-size: 13px; background: transparent; border-color: transparent; }
+      .pestanas button[aria-selected="true"] { color: #10264d; background: #80b927; font-weight: 700; }
+      .pestanas button:focus-visible { outline: 3px solid #edf2f6; outline-offset: 2px; }
       canvas { display: block; }
     </style>
   </head>
@@ -58,6 +62,11 @@
     <div class="crosshair" aria-hidden="true"></div>
     <section class="panel-puestos" id="panel-puestos" aria-label="Selección de puesto" hidden>
       <h1>Reserva de puesto</h1>
+      <div class="pestanas" role="tablist" aria-label="Día a consultar">
+        <button id="tab-hoy" type="button" role="tab" aria-selected="false" data-dia="hoy">Hoy</button>
+        <button id="tab-siguiente" type="button" role="tab" aria-selected="true" data-dia="siguiente">Día hábil siguiente</button>
+      </div>
+      <p class="aviso-feriados" id="aviso-sin-reserva" hidden>Tu usuario no tiene habilitada la reserva de puestos: solo puedes consultar los puestos de hoy.</p>
       <p class="fecha-reserva" id="fecha-reserva">Consultando disponibilidad…</p>
       <label for="puesto">Puesto</label>
       <select id="puesto"><option value="">Selecciona un puesto</option></select>
@@ -68,9 +77,9 @@
       </div>
       <p class="aviso-feriados" id="aviso-feriados" hidden>Los feriados aún no están cargados: la fecha mostrada podría no ser hábil.</p>
       <div class="leyenda" aria-label="Leyenda de estados">
-        <span><i style="background:#1f8a5b"></i>Libre</span>
+        <span><i style="background:#5d9a1c"></i>Libre</span>
         <span><i style="background:#c0392b"></i>Reservado</span>
-        <span><i style="background:#7b3fc4"></i>Tu puesto</span>
+        <span><i style="background:#2f5fb3"></i>Tu puesto</span>
       </div>
     </section>
     <div class="sugerencia" id="sugerencia" hidden></div>
