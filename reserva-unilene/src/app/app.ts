@@ -1,16 +1,21 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { Instructivo } from './instructivo/instructivo';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [Instructivo],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
+  // Página pública: no consulta la sesión ni muestra el login.
+  protected readonly instructivo = location.pathname.replace(/\/+$/, '') === '/instructivo';
   protected readonly notice = signal('');
   protected readonly username = signal('');
 
   constructor() {
+    if (this.instructivo) return;
     void fetch('/api/auth/session', { credentials: 'same-origin' })
       .then(async response => {
         if (response.ok) this.username.set((await response.json()).username);
