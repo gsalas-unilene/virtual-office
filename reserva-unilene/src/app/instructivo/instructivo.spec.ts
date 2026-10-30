@@ -7,7 +7,7 @@ describe('Instructivo', () => {
     const fixture = TestBed.createComponent(Instructivo);
     await fixture.whenStable();
     const html = fixture.nativeElement as HTMLElement;
-    expect(html.querySelector('h1')?.textContent).toContain('Cómo reservo mi puesto');
+    expect(html.querySelector('h1')?.textContent).toContain('Cómo reservar tu puesto');
     expect(html.querySelector('iframe')?.getAttribute('src')).toBe('/demo/?demo#puestos');
   });
 });
