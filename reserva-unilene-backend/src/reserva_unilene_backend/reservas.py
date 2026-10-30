@@ -1,5 +1,6 @@
 """Reserva de puestos para el próximo día hábil (sábados, domingos y feriados de RU_Feriado excluidos)."""
 
+import logging
 import os
 import re
 from datetime import date, timedelta
@@ -38,21 +39,30 @@ def _fecha(valor) -> date:
     return valor if type(valor) is date else date.fromisoformat(str(valor)[:10])
 
 
-def _fecha_objetivo(cursor) -> tuple[date, bool]:
-    """Próximo día hábil según la fecha del servidor SQL y si hay feriados cargados."""
+def _fecha_objetivo(cursor, dia: str = "siguiente") -> tuple[date, bool]:
+    """Hoy o el próximo día hábil (según la fecha del servidor SQL) y si hay feriados cargados."""
     _ejecutar(cursor, "SELECT CAST(GETDATE() AS date)")
     hoy = _fecha(cursor.fetchone()[0])
     _ejecutar(cursor, "SELECT fecha_feriado FROM dbo.RU_Feriado WHERE fecha_feriado > ? AND fecha_feriado <= DATEADD(day, 60, ?)", hoy, hoy)
     feriados = {_fecha(fila[0]) for fila in cursor.fetchall()}
     _ejecutar(cursor, "SELECT COUNT(*) FROM dbo.RU_Feriado")
-    return siguiente_dia_habil(hoy, feriados), cursor.fetchone()[0] > 0
+    return (hoy if dia == "hoy" else siguiente_dia_habil(hoy, feriados)), cursor.fetchone()[0] > 0
 
 
-def estado(id_usuario: int) -> dict:
+def _puede_reservar(cursor, id_usuario: int) -> bool:
+    """Solo reserva quien tiene correo corporativo cargado y rotar = 1 (los carga RR. HH. a mano)."""
+    _ejecutar(cursor, "SELECT 1 FROM dbo.RU_UsuarioCorreo WHERE cod_usuario = ? AND rotar = 1 AND LEN(LTRIM(RTRIM(correo))) > 0", id_usuario)
+    return cursor.fetchone() is not None
+
+
+def estado(id_usuario: int, dia: str = "siguiente") -> dict:
     connection = connect_to_database()
     try:
         cursor = connection.cursor()
-        fecha, feriados_cargados = _fecha_objetivo(cursor)
+        puede_reservar = _puede_reservar(cursor, id_usuario)
+        if dia == "siguiente" and not puede_reservar:
+            raise ReservaError("no_habilitado", 403)
+        fecha, feriados_cargados = _fecha_objetivo(cursor, dia)
         _ejecutar(cursor, 
             "SELECT p.codigo_puesto, r.id_usuario FROM dbo.RU_Reserva r "
             "JOIN dbo.RU_Puesto p ON p.id_puesto = r.id_puesto WHERE r.fecha_reserva = ? AND r.esta_activa = 1",
@@ -61,15 +71,27 @@ def estado(id_usuario: int) -> dict:
         filas = cursor.fetchall()
         mio = next((int(codigo) for codigo, usuario in filas if usuario == id_usuario), None)
         ocupados = sorted(int(codigo) for codigo, usuario in filas if usuario != id_usuario)
-        return {"fecha": fecha.isoformat(), "feriados_cargados": feriados_cargados, "ocupados": ocupados, "mio": mio}
+        return {"fecha": fecha.isoformat(), "feriados_cargados": feriados_cargados, "ocupados": ocupados, "mio": mio, "puede_reservar": puede_reservar}
     finally:
         connection.close()
+
+
+def _notificar(connection, cursor, id_usuario: int, numero: int, fecha: date) -> None:
+    """Correo de confirmación vía store; la reserva ya está confirmada, así que un fallo solo se registra."""
+    try:
+        _ejecutar(cursor, "EXEC dbo.RU_EnviarCorreoReserva ?, ?, ?", id_usuario, str(numero), fecha)
+        connection.commit()
+    except Exception as error:
+        connection.rollback()
+        logging.getLogger("uvicorn.error").error("correo de reserva: %s: %.300s", type(error).__name__, error)
 
 
 def reservar(id_usuario: int, numero: int) -> dict:
     connection = connect_to_database()
     try:
         cursor = connection.cursor()
+        if not _puede_reservar(cursor, id_usuario):
+            raise ReservaError("no_habilitado", 403)
         fecha, _ = _fecha_objetivo(cursor)
         try:
             _ejecutar(cursor, 
@@ -92,6 +114,7 @@ def reservar(id_usuario: int, numero: int) -> dict:
                 raise ReservaError("ya_tienes", 409)
             raise ReservaError("puesto_invalido", 404)
         connection.commit()
+        _notificar(connection, cursor, id_usuario, numero, fecha)
         return {"fecha": fecha.isoformat(), "numero": numero}
     finally:
         connection.close()

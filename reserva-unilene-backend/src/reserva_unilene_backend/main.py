@@ -1,5 +1,7 @@
 """FastAPI application entry point."""
 
+from typing import Literal
+
 import logging
 import os
 import hmac
@@ -116,8 +118,8 @@ def _con_reservas(request: Request, action, status_code: int = 200):
 
 
 @app.get('/reservas/estado')
-def reservas_estado(request: Request):
-    return _con_reservas(request, reservas.estado)
+def reservas_estado(request: Request, dia: Literal['hoy', 'siguiente'] = 'siguiente'):
+    return _con_reservas(request, lambda user_id: reservas.estado(user_id, dia))
 
 
 @app.post('/reservas')
