@@ -134,7 +134,7 @@ const RADIUS = 0.25;
 const SPEED = 3.2;
 const player = { u: SPAWN.u, v: SPAWN.v, yaw: SPAWN.yaw, pitch: 0 };
 const keys = new Set();
-let mode = demo || (window.location.hash && window.location.hash !== '#puestos') ? 'overview' : 'walk';
+let mode = window.location.hash && window.location.hash !== '#puestos' ? 'overview' : 'walk';
 const seleccionHabilitada = window.location.hash === '#puestos';
 const panelPuestos = document.querySelector('#panel-puestos');
 const listaPuestos = document.querySelector('#puesto');

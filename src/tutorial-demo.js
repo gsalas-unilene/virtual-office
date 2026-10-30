@@ -30,24 +30,25 @@ export function iniciarTutorial() {
       tocar('#dialogo-principal');
     },
     steps: [
-      { popover: { title: 'Reservo mi puesto en 1 minuto', description: 'Esto es el visor real en modo demostración: lo que hago aquí no reserva nada de verdad. Pulso «Siguiente» para avanzar.', onNextClick: siguiente() } },
-      paso('canvas', 'Miro el piso 4 en 3D', 'Arrastro para girar, uso la rueda para acercar y el clic derecho para desplazarme. Los botones sobre las mesas son los puestos.'),
-      paso('#mode', 'Vista general y recorrido', 'Cambio a «Recorrido» para caminar por la oficina con W A S D o las flechas y miro con el mouse. Esc libera el mouse.'),
-      paso('#panel-puestos', 'Mi panel de reserva', 'Aquí elijo el día, veo mi reserva y consulto el estado de cada puesto.'),
-      paso('.pestanas', 'Elijo el día', '«Hoy» solo me sirve para consultar. Para reservar uso «Día hábil siguiente»: sábados, domingos y feriados se saltan solos.'),
-      paso('#abrir-mapa', 'Abro el mapa de puestos', 'Abro un plano 2D con todos los números para ubicar dónde queda cada puesto.', async () => { tocar('#abrir-mapa'); await esperar(450); }),
-      paso('.mapa-tarjeta', 'Me ubico en el plano', 'Acerco con la rueda o con + y −, y arrastro para moverme. Al tocar un puesto se abre su reserva.', async () => { tocar('#cerrar-mapa'); await esperar(300); }),
-      paso('#puesto', 'Elijo un puesto', 'Escojo el número en la lista, hago clic en su botón en el 3D o lo toco en el mapa. Pruebo con el puesto 12.', async () => {
+      { popover: { title: 'Reserva tu puesto en 1 minuto', description: 'Esto es el visor real en modo demostración: lo que hagas aquí no reserva nada de verdad. Pulsa «Siguiente» para avanzar.', onNextClick: siguiente() } },
+      paso('canvas', 'Camina por la oficina en 3D', 'Estás en primera persona: muévete con W A S D o las flechas y mira con el mouse (haz clic en el 3D para capturarlo; Esc lo libera). Los botones sobre las mesas son los puestos.'),
+      paso('.crosshair', 'Apunta con la mira', 'Pon la mira sobre el botón de un puesto y pulsa E (o haz clic) para elegirlo.'),
+      paso('#mode', 'Vista general', 'Con este botón pasas a la vista desde arriba para ver todo el piso, y vuelves al recorrido cuando quieras.'),
+      paso('#panel-puestos', 'Panel de reserva', 'Aquí eliges el día, ves tu reserva y consultas el estado de cada puesto.'),
+      paso('.pestanas', 'Elige el día', '«Hoy» solo sirve para consultar. Para reservar usa «Día hábil siguiente»: sábados, domingos y feriados se saltan solos.'),
+      paso('#abrir-mapa', 'Mapa de puestos', 'Abre un plano 2D con todos los números para ubicar dónde queda cada puesto.', async () => { tocar('#abrir-mapa'); await esperar(450); }),
+      paso('.mapa-tarjeta', 'Ubícate en el plano', 'Acerca con la rueda o con + y −, y arrastra para moverte. Al tocar un puesto se abre su reserva.', async () => { tocar('#cerrar-mapa'); await esperar(300); }),
+      paso('#puesto', 'Elige un puesto', 'Puedes escoger el número en la lista, apuntarlo en el 3D o tocarlo en el mapa. Probemos con el puesto 12.', async () => {
         const lista = document.querySelector('#puesto');
         lista.value = '12';
         lista.dispatchEvent(new Event('change'));
         await esperar(450);
       }),
-      paso('#dialogo .tarjeta', 'Confirmo mi reserva', 'Reviso el día y pulso «Confirmar reserva» (o Enter). Esc cierra sin reservar. Tengo un solo puesto por día y, si dos personas eligen el mismo a la vez, solo la primera lo consigue.', async () => { tocar('#dialogo-principal'); await esperar(700); }),
-      paso('#confirmacion .pantalla', '¡Reservé mi puesto!', 'Al confirmar me llega un correo a mi cuenta corporativa con mi nombre, el puesto y la fecha. En esta demo no se envía ninguno.', async () => { tocar('#confirmacion'); await esperar(300); }),
-      paso('#mi-reserva', 'Mi reserva', 'Mi puesto aparece aquí. Si ya no lo necesito, pulso «Cancelar» para dejarlo libre y poder elegir otro.'),
-      paso('.leyenda', 'Los colores', 'Verde: libre. Rojo: reservado por otra persona. Azul: mi puesto.'),
-      { popover: { title: '¿No puedo reservar?', description: 'Si veo el aviso «Tu usuario no tiene habilitada la reserva de puestos», solo puedo consultar «Hoy». Pido que habiliten mi usuario. ¡Eso es todo!', onNextClick: () => guia.destroy() } },
+      paso('#dialogo .tarjeta', 'Confirma la reserva', 'Revisa el día y pulsa «Confirmar reserva» (o Enter). Esc cierra sin reservar. Tienes un solo puesto por día y, si dos personas eligen el mismo a la vez, solo la primera lo consigue.', async () => { tocar('#dialogo-principal'); await esperar(700); }),
+      paso('#confirmacion .pantalla', '¡Reservado!', 'Al confirmar te llega un correo a tu cuenta corporativa con tu nombre, el puesto y la fecha. En esta demo no se envía ninguno.', async () => { tocar('#confirmacion'); await esperar(300); }),
+      paso('#mi-reserva', 'Tu reserva', 'Tu puesto aparece aquí. Si ya no lo necesitas, pulsa «Cancelar» para dejarlo libre y poder elegir otro.'),
+      paso('.leyenda', 'Colores', 'Verde: libre. Rojo: reservado por otra persona. Azul: tu puesto.'),
+      { popover: { title: '¿No puedes reservar?', description: 'Si ves el aviso «Tu usuario no tiene habilitada la reserva de puestos», solo podrás consultar «Hoy». Pide que habiliten tu usuario. ¡Eso es todo!', onNextClick: () => guia.destroy() } },
     ],
   });
   guia.drive();
